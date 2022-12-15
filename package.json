@@ -1,0 +1,24 @@
+{
+  "name": "validace",
+  "version": "1.0.0",
+  "description": "Validace allows your validate JSON/Javascript Object using a structred Object schema",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slick-codes/validace.git"
+  },
+  "keywords": [
+    "node.js",
+    "react.js",
+    "vue.js"
+  ],
+  "author": "Paul Ezekiel-Hart",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/slick-codes/validace/issues"
+  },
+  "homepage": "https://github.com/slick-codes/validace#readme"
+}
