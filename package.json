@@ -2,7 +2,8 @@
   "name": "validace",
   "version": "1.0.0",
   "description": "Validace allows your validate JSON/Javascript Object using a structred Object schema",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/slick-codes/validace/issues"
   },
-  "homepage": "https://github.com/slick-codes/validace#readme"
+  "homepage": "https://github.com/slick-codes/validace#readme",
+  "dependencies": {
+    "validator": "^13.7.0"
+  }
 }
