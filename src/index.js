@@ -4,7 +4,16 @@ const Schema = class {
     constructor(schema, configuration) {
         this.schema = schema ?? {}
         this.nestedSchema = null
-        this.supportedType = ["string", "number", "boolean", "email", "array", "object"]
+        this.supportedType = [
+            "string",
+            "number",
+            "boolean",
+            "email",
+            "array",
+            "object",
+            "jwt",
+            "mongoid"
+        ]
         this.config = configuration ?? {
             // default configuration
             preventUnregisteredKeys: true
@@ -26,18 +35,23 @@ const Schema = class {
             })
 
         for (let schemaKey of schemaKeys) {
-            console.log(schemaKey)
+            // console.log(schemaKey)
             const dataValue = objectData[schemaKey]
             let schemaData = schema[schemaKey]
+
+            // check if key has type 
+            if (typeof schemaData !== 'string' && !schemaData.type)
+                throw new Error(`ValidaceError: ${schemaKey} has no type declearation`)
 
             // check if key only has a type declearation
             if (typeof schemaData === 'string')
                 schemaData = { type: schemaData }
 
 
+
             // check if the schema key exist in the data
             const valueExist = Object.keys(objectData).includes(schemaKey)
-            const isTypeSupported = this.supportedType.includes(schemaData.type)
+            const isTypeSupported = this.supportedType.includes(schemaData.type.toLowerCase())
 
 
             // Handle Type
@@ -52,13 +66,23 @@ const Schema = class {
                 throw new Error(`ValidaceError: Syntax Error ~ "${schemaData.type}" is not a valid type`)
             }
 
-            // validate nested schemas
+            if (schemaData.$_validateInside && !schemaData.$_data)
+                throw new Error('$_data feild is missing in schema')
+
+            // validate nested obj schemas
             if (schemaData.type === 'object' &&
                 schemaData.$_validateInside && dataValue) {
                 this.nestedSchema = schemaData.$_data
                 this.validate(dataValue)
-                // this.nestedSchema = null
-                // continue;
+                this.nestedSchema = null
+            }
+            // validate nested array of object schema
+            if (schemaData.type === "array" && schemaData.$_validateInside) {
+                for (let object of dataValue) {
+                    this.nestedSchema = schemaData.$_data[0]
+                    this.validate(object)
+                }
+
             }
 
             // Handle Required feild
@@ -77,15 +101,27 @@ const Schema = class {
             else if (schemaData.maxValue && dataValue < schemaData.maxValue)
                 throw new Error(`ValidaceError: ${schemaKey} is lower than ${schemaData.maxValue}`)
             // Handle: cases lower and upper
-            if (schemaData.toLower)
-                objectData[schemaKey] = objectData[shcemaKey].toLowerCase()
+            if (schemaData.toLower) {
+                objectData[schemaKey] = objectData[schemaKey].toLowerCase()
+            }
             else if (schemaData.toUpper)
                 objectData[schemaKey] = objectData[schemaKey].toUpperCase()
-
 
             // Handle data modification (midifyValue) feild
             if (typeof schemaData.modifyValue === 'function')
                 objectData[schemaKey] = schemaData.modifyValue(dataValue)
+
+
+            // Handle: Enum
+            if (schemaData.enum && !Array.isArray(schemaData.enum))
+                throw new Error(`ValidaceError: ${schemaKey}.enum should be an array`)
+            else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
+                throw new Error(`ValidaceError: ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`)
+
+            // if (schemaData.enum && schemaData.enum)
+
+
+
 
             // Handle validate function
             if (typeof schemaData.validate === 'function')
@@ -103,6 +139,7 @@ const Schema = class {
 
 
     #typeValidation(type, value) {
+        type = type.toLowerCase()
         // check if it's an object
         if (type === 'object')
             return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -112,6 +149,13 @@ const Schema = class {
         // check if value is a valid email
         else if (type === 'email')
             return validator.isEmail(value)
+        //  check if value is a jwt
+        else if (type === 'jwt')
+            return validator.isJWT(value)
+        // check if value is a valid mongodb id
+        else if (type === 'mongoid') {
+            return validator.isMongoId(value)
+        }
         // check if value is a valid array
         else if (type === 'array')
             return Array.isArray(value)
@@ -147,35 +191,80 @@ const loginSchema = new Schema({
             gender: {
                 type: "string",
                 required: true,
-                enum: ["male", "female"]
+                enum: ["male", "female"],
+                toLower: true
             }
         }
+    },
+    _id: {
+        type: "mongoId",
+        required: true
     },
     age: {
         type: "number",
         minValue: 18,
         required: true
+    },
+    stuffs: {
+        type: "array",
+        required: true,
+        $_validateInside: true,
+        $_data: [{
+            name: {
+                required: true,
+                type: "object",
+                $_validateInside: true,
+                $_data: {
+                    height: "number",
+                    isDark: "boolean",
+                    friends: {
+                        type: "array",
+                        required: true,
+                        $_validateInside: true,
+                        $_data: [{
+                            name: {
+                                type: "string",
+                                required: true
+                            },
+                            age: "number",
+                            isDark: "boolean"
+                        }]
+                    }
+                }
+            }
+        }]
     }
 }, {
-    preventUnregisteredKeys: false
+    preventUnregisteredKeys: true
 })
 
 
 console.log(loginSchema.validate({
     email: "hartpaulisimo@gmail.com",
-    password: "123456789",
+    // password: "123456789",
     users: {
-        gender: "male",
+        gender: "Female",
         name: "Paul"
     },
-    age: 17
+    _id: "6394e5d2efefd6b89f52afbc",
+    age: 17,
+    stuffs: [{
+        name: {
+            height: 4,
+            isDark: true,
+            friends: [{
+                name: "mike",
+                age: 59,
+                isDark: false
+            }, {
+                name: "Samuel",
+                age: 5,
+                isDark: true
+            }]
+        }
+    }]
 }))
 
-
-
-// module.exports = {
-//     Schema
-// }
 
 
 
