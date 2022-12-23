@@ -5,6 +5,7 @@ const Schema = class {
         this.schema = schema ?? {}
         this.nestedSchema = null
         this.error = {}
+        this.tempError = []
         this.nestedError = undefined
         this.key = undefined
         this.supportedType = [
@@ -23,10 +24,10 @@ const Schema = class {
         }
     }
 
-    validate(objectData) {
+    validate(objectData, callback) {
         const validData = {}
         const schema = this.nestedSchema ?? this.schema
-        const error = this.nestedError ?? this.error
+        let error = {}
 
         const schemaKeys = Object.keys(schema)
 
@@ -34,16 +35,20 @@ const Schema = class {
         if (this.config.preventUnregisteredKeys)
             Object.keys(objectData).forEach(key => {
                 if (!schemaKeys.includes(key))
-                    throw new Error(`ValidaceError: "${key}" is not registered in the schema!`)
+                    error = this.#setError(key, error, { // error handling
+                        unRegisteredKey: `  "${key}" is not registered in the schema!`,
+                    })
             })
 
         for (let schemaKey of schemaKeys) {
             const dataValue = objectData[schemaKey]
             let schemaData = schema[schemaKey]
 
-            // check if key has type 
+            // check if schema has type 
             if (typeof schemaData !== 'string' && !schemaData.type)
-                throw new Error(`ValidaceError: ${schemaKey} has no type declearation`)
+                error = this.#setError(schemaKey, error, { // error handling
+                    type: ` "${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
+                })
 
             // check if key only has a type declearation
             if (typeof schemaData === 'string')
@@ -51,41 +56,58 @@ const Schema = class {
 
             // check if the schema key exist in the data
             const valueExist = Object.keys(objectData).includes(schemaKey)
-            const isTypeSupported = this.supportedType.includes(schemaData.type.toLowerCase())
+            const isTypeSupported = this.supportedType.includes(schemaData.type?.toLowerCase())
 
             // Handle Type
             if (isTypeSupported) {
                 if (!Array.isArray(schemaData.type)) {
                     const typeCheck = this.#typeValidation(schemaData.type, dataValue)
                     if (!typeCheck && valueExist)
-                        throw new Error(`ValidaceError: "${schemaKey}" key is not a supported ${schemaData.type ?? 'datatype'}`)
+                        error = this.#setError(schemaKey, error, { // error handling
+                            type: ` "${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
+                        })
                 }
+            } else if (typeof schemaData !== 'string') {
+                error = this.#setError(schemaKey, error, { // error handling
+                    type: `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
+                })
             }
             else {
-                throw new Error(`ValidaceError: Syntax Error ~ "${schemaData.type}" is not a valid type`)
+                error = this.#setError(schemaKey, error, { // error handling
+                    type: `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
+                })
             }
-
 
             // validate nested obj schemas
             if (schemaData.type === 'object' &&
                 schemaData.$_data && dataValue) {
                 this.nestedSchema = schemaData.$_data
-                this.key = schemaKey
-                this.validate(dataValue)
+                const result = this.validate(dataValue)
+                if (Object.keys(result.error).length > 0) {
+                    error = { ...error, [schemaKey]: { ...result.error } }
+                }
                 this.nestedSchema = null
             }
             // validate nested array of object schema
             if (schemaData.type === "array" && schemaData.$_data) {
                 if (!Array.isArray(schemaData.$_data))
-                    throw new Error('$_data should be an array with object')
+                    error = this.#setError(schemaKey, error, { // error handling
+                        type: ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
+                    })
 
-                for (let object of dataValue) {
+                if (!Array.isArray(dataValue)) {
+                    error = this.#setError(schemaKey, error, { // error handling
+                        type: ` "${schemaKey}" should be an array of object`,
+                    })
+                } else for (let object of dataValue) {
                     this.nestedSchema = schemaData.$_data[0]
                     this.key = schemaKey
-                    this.validate(object)
+                    const result = this.validate(object)
+                    if (Object.keys(result.error).length > 0) {
+                        error = { ...error, [schemaKey]: [result.error] }
+                    }
                     this.nestedSchema = null
                     this.key = undefined
-                    // continue
                 }
 
             }
@@ -96,24 +118,31 @@ const Schema = class {
 
             // Handle Required feild
             if (schemaData.required && !objectData[schemaKey])
-                this.#setError(schemaKey, { // error handling on the required key!
-                    [schemaKey]: {
-                        required: `${schemaKey} feild is required!`,
-                        messages: [schemaKey].message ? [schemaKey.message].push(`${schemaKey} feild is required!`) : [`${schemaKey} feild is required!`]
-                    }
+                error = this.#setError(schemaKey, error, { // error handling
+                    required: `"${schemaKey}" feild is required!`,
                 })
 
             // Handle minLength && maxLength
-            if (schemaData.minLength && dataValue.length < schemaData.minLength)
-                throw new Error(`ValidaceError: ${schemaKey} should be ${schemaData.minLength} characters and above`)
-            if (schemaData.maxLength && dataValue.length > schemaData.maxLength)
-                throw new Error(`ValidaceError: ${schemaKey} should be ${schemaData.maxLength} characters and below. `)
+            if (schemaData.minLength && dataValue?.length < schemaData.minLength)
+                error = this.#setError(schemaKey, error, { // error handling
+                    minLength: `${schemaKey} should be ${schemaData.minLength} characters or above`
+                })
+            // Handle maxLength
+            if (schemaData.maxLength && dataValue?.length > schemaData.maxLength)
+                error = this.#setError(schemaKey, error, { // error handling
+                    minLength: ` ${schemaKey} should be ${schemaData.maxLength} characters or below. `
+                })
 
             // validate minValue and maxValue
             if (schemaData.minNumber && dataValue > schemaData.maxNumber)
-                throw new Error(`ValidaceError: ${schemaKey} is higher than ${schemaData.maxNumber}`)
+                error = this.#setError(schemaKey, error, { // error handling
+                    minNumber: `${schemaKey} is higher than ${schemaData.maxNumber}`
+                })
             if (schemaData.maxNumber && dataValue < schemaData.minNumber)
-                throw new Error(`ValidaceError: ${schemaKey} is lower than ${schemaData.minNumber}`)
+                error = this.#setError(schemaKey, error, { // error handling
+                    maxNumber: ` ${schemaKey} is lower than ${schemaData.minNumber}`
+                })
+
             // Handle: cases lower and upper
             if (schemaData.toLower) {
                 objectData[schemaKey] = objectData[schemaKey].toLowerCase()
@@ -125,11 +154,21 @@ const Schema = class {
             if (typeof schemaData.modifyValue === 'function')
                 objectData[schemaKey] = schemaData.modifyValue(dataValue)
 
+
             // Handle: Enum
             if (schemaData.enum && !Array.isArray(schemaData.enum))
-                throw new Error(`ValidaceError: ${schemaKey}.enum should be an array`)
+                error = this.#setError(schemaKey, error, { // error handling
+                    msc: `${schemaKey}.enum should be an array`
+                })
             else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
-                throw new Error(`ValidaceError: ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`)
+                error = this.#setError(schemaKey, error, { // error handling
+                    enum: ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
+                })
+
+
+            if (typeof schemaData.func === 'function') {
+                schemaData.func(error[schemaKey], objectData[schemaKey], Object.keys(error).length === 0)
+            }
 
             // Handle validate function
             if (typeof schemaData.validate === 'function')
@@ -138,18 +177,22 @@ const Schema = class {
 
         this.nestedSchema = null
 
-        return {
-            error: this.error,
-            isValid: Object.keys(this.error).length === 0,
-            data: objectData
-        }
+        if (typeof callback === 'function')
+            return callback(
+                Object.keys(error).length === 0 ? null : error,
+                Object.keys(this.error).length === 0,
+                Object.keys(this.error).length === 0 ? objectData : {})
+        else
+            return {
+                error: error,
+                isValid: Object.keys(this.error).length === 0,
+                data: Object.keys(this.error).length === 0 ? objectData : {}
+            }
     }
 
-    #setError(key, object, error) {
-        if (this.nestedSchema)
-            this.error = { ...this.error, [this.key]: object }
-        else
-            this.error = { ...this.error, ...object }
+    #setError(key, error, newError) {
+        this.error = error[key] ? { ...error, [key]: { ...error[key], ...newError } } : { ...error, [key]: newError }
+        return this.error
     }
 
     #typeValidation(type, value) {
@@ -160,6 +203,8 @@ const Schema = class {
         // check if value is a valid (boolean, string, number)
         else if (typeof value === type)
             return true
+        else if (type === 'float')
+            return validator.isFloat(value)
         // check if value is a valid array
         else if (type === 'array')
             return Array.isArray(value)
