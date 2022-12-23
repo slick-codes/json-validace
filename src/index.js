@@ -5,9 +5,6 @@ const Schema = class {
         this.schema = schema ?? {}
         this.nestedSchema = null
         this.error = {}
-        this.tempError = []
-        this.nestedError = undefined
-        this.key = undefined
         this.supportedType = [
             "string",
             "number",
@@ -101,13 +98,11 @@ const Schema = class {
                     })
                 } else for (let object of dataValue) {
                     this.nestedSchema = schemaData.$_data[0]
-                    this.key = schemaKey
                     const result = this.validate(object)
                     if (Object.keys(result.error).length > 0) {
                         error = { ...error, [schemaKey]: [result.error] }
                     }
                     this.nestedSchema = null
-                    this.key = undefined
                 }
 
             }
@@ -181,12 +176,12 @@ const Schema = class {
             return callback(
                 Object.keys(error).length === 0 ? null : error,
                 Object.keys(this.error).length === 0,
-                Object.keys(this.error).length === 0 ? objectData : {})
+                Object.keys(this.error).length === 0 ? objectData : null)
         else
             return {
-                error: error,
+                error: Object.keys(error).length === 0 ? null : error,
                 isValid: Object.keys(this.error).length === 0,
-                data: Object.keys(this.error).length === 0 ? objectData : {}
+                data: Object.keys(this.error).length === 0 ? objectData : null
             }
     }
 
