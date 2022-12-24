@@ -22,7 +22,6 @@ const Schema = class {
     }
 
     validate(objectData, callback) {
-        const validData = {}
         const schema = this.nestedSchema ?? this.schema
         let error = {}
 
@@ -47,7 +46,7 @@ const Schema = class {
                     type: ` "${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
                 })
 
-            // check if key only has a type declearation
+            // set key to object if key value is type
             if (typeof schemaData === 'string')
                 schemaData = { type: schemaData }
 
