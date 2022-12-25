@@ -77,7 +77,7 @@ console.log(result)
 | 6   | date    | 1997-10-17       | date is a sub-type of string and it checks if the parsed data is a valid date type, it uses the YYYY-MM-DD configuration and it will work with any javascript date object like the date number (1671987916618) or (2022-12-25T17:05:33.957Z)
 | 7   | array   | ["Paul", "Mike"] | array checks if the parsed in value is a valid array, depending on your schema you can also validate the value if the array is an array of object.
 | 8   | object  | {author: "Paul"} | object type check if the data parsed is a valid object literal
-| 9   | jwt     |  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.<br> eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6 <br> IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ<br>.SflKxwRJSMeKKF2QT4fwpMeJ<br>f36POk6yJV_adQssw5c                 | JWT (JSON Web Token) is a sub-type of string and it checks if the parsed string meets the jwt standard.
+| 9   | jwt     |  eyJhbGciOiJIUzI1NiIsInR5c<br>CI6IkpXVCJ9.eyJzdWIiOiI<br>xMjM0NTY3ODkwIiwibmFtZSI6 <br> IkpvaG4gRG9lIiwiaWF0Ij<br>oxNTE2MjM5MDIyfQ<br>.SflKxwRJSMeKKF2QT4fwp<br>MeJf36POk6yJV_adQssw5c                 | JWT (JSON Web Token) is a sub-type of string and it checks if the parsed string meets the jwt standard.
 | 10  | mongoid | 507f191e810c19729de860ea | the mongoId type is a sub-type of string and it checks if the string provided is a valid mongoID.
 
 # More Doc coming soon...
