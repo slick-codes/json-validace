@@ -16,7 +16,7 @@ npm install --save json-validace
 ```
 ```bash
 # yarn 
-npm yarn add json-validace 
+yarn add json-validace 
 ```
 
 # Usage & example
