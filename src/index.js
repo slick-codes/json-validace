@@ -8,12 +8,12 @@ const Schema = class {
         this.supportedType = [
             "string",
             "number",
+            "float",
             "boolean",
             "array",
             "object",
             "email",
             "date",
-            "float",
             "jwt",
             "mongoid"
         ]
@@ -192,7 +192,6 @@ const Schema = class {
     }
 
     #isDate(value) {
-        console.log(value)
         const result = String(new Date(value))
         return result === 'Invalid Date' ? false : true
     }
