@@ -1,14 +1,14 @@
 {
-  "name": "validace",
+  "name": "json-validace",
   "version": "1.0.0",
-  "description": "Validace allows your validate JSON/Javascript Object using a structred Object schema",
+  "description": "Json-Validace allows you validate JSON/Javascript Object using a structred Object schema",
   "main": "src/index.js",
   "scripts": {
     "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/slick-codes/validace.git"
+    "url": "git+https://github.com/slick-codes/json-validace.git"
   },
   "keywords": [
     "node.js",
@@ -18,9 +18,9 @@
   "author": "Paul Ezekiel-Hart",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/slick-codes/validace/issues"
+    "url": "https://github.com/slick-codes/json-validace/issues"
   },
-  "homepage": "https://github.com/slick-codes/validace#readme",
+  "homepage": "https://github.com/slick-codes/json-validace#readme",
   "dependencies": {
     "validator": "^13.7.0"
   },
