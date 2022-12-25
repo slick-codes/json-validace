@@ -189,6 +189,11 @@ const Schema = class {
         return this.error
     }
 
+    #isDate(value) {
+        const result = String(new Date(value))
+        return result === 'Invalid Date' ? false : true
+    }
+
     #typeValidation(type, value) {
         type = type.toLowerCase()
         // check if it's an object
@@ -197,6 +202,8 @@ const Schema = class {
         // check if value is a valid (boolean, string, number)
         else if (typeof value === type)
             return true
+        else if (typeof value === 'date')
+            return this.#isDate(value)
         else if (type === 'float')
             return validator.isFloat(value)
         // check if value is a valid array
