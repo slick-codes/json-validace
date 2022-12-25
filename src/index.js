@@ -12,6 +12,8 @@ const Schema = class {
             "array",
             "object",
             "email",
+            "date",
+            "float",
             "jwt",
             "mongoid"
         ]
@@ -32,7 +34,7 @@ const Schema = class {
             Object.keys(objectData).forEach(key => {
                 if (!schemaKeys.includes(key))
                     error = this.#setError(key, error, { // error handling
-                        unRegisteredKey: `  "${key}" is not registered in the schema!`,
+                        unRegisteredKey: `  "${key}" is not registered on the schema!`,
                     })
             })
 
@@ -60,7 +62,7 @@ const Schema = class {
                     const typeCheck = this.#typeValidation(schemaData.type, dataValue)
                     if (!typeCheck && valueExist)
                         error = this.#setError(schemaKey, error, { // error handling
-                            type: ` "${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
+                            type: ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
                         })
                 }
             } else if (typeof schemaData !== 'string') {
@@ -190,8 +192,13 @@ const Schema = class {
     }
 
     #isDate(value) {
+        console.log(value)
         const result = String(new Date(value))
         return result === 'Invalid Date' ? false : true
+    }
+
+    #isFloat(value) {
+        return Number(value) === value && value % 1 !== 0;
     }
 
     #typeValidation(type, value) {
@@ -202,10 +209,10 @@ const Schema = class {
         // check if value is a valid (boolean, string, number)
         else if (typeof value === type)
             return true
-        else if (typeof value === 'date')
+        else if (type === 'date')
             return this.#isDate(value)
         else if (type === 'float')
-            return validator.isFloat(value)
+            return this.#isFloat(value)
         // check if value is a valid array
         else if (type === 'array')
             return Array.isArray(value)
