@@ -91,8 +91,7 @@ test("Failed ~ Signup form: (test: required, email, array with no $_data, dateOf
 });
 
 // test: Test if datatype is an array
-test(
-  "Success ~ Array type is valid",
+test("Success ~ Array type is valid", () => {
   expect(
     simpleSchemas.musicObject.validate({
       name: "Rema",
@@ -107,5 +106,5 @@ test(
       genres: ["Divine", "Woman", "Dumebi"],
       date: "2018-10-06",
     },
-  })
-);
+  });
+});
