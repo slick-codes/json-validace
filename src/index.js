@@ -227,10 +227,10 @@ const Schema = class {
             return validator.isEmail(value ? value : "")
         //  check if value is a jwt
         else if (type === 'jwt')
-            return validator.isJWT(value)
+            return validator.isJWT(value ? value : "")
         // check if value is a valid mongodb id
         else if (type === 'mongoid') {
-            return validator.isMongoId(String(value))
+            return validator.isMongoId(String(value ? value : ""))
         }
         else
             return false
