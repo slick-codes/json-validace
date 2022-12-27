@@ -1,7 +1,6 @@
 
 # Description
-
-JSON validace (json-validace) is an open source schema base validator that allows developers validate json and javascript object using an object Schema.
+JSON validace (json-validace) is an open source schema base validator that allows developers validate json and javascript object using an itiutive object schema.
 
 #### Why use json-validace
 
@@ -57,7 +56,7 @@ const result = loginSchema.validate({
     password: "slickcodes"
 })
 
-// login the result
+// log result to console | terminal
 console.log(result)
 ```
 
@@ -70,7 +69,7 @@ console.log(result)
     }
 ```
 
-### NOTE
+#### NOTE
 
 if you're using <strong>REACT, VUE ,Svelte, Angular </strong> or other frontend framework you'll need to import using the import keyword.
 
@@ -82,11 +81,25 @@ or
 import jsonValidace from "json-validace"
 ```
 
-# Types
+# Schema Properties & Methods
+Properties & methods are the foundation of this library as they help specify the structure of the value expected. so far we have two types of Properties & methods namely Modifiers and Validators.
 
-the Type key is the only required key in the schema, it states what type of data is expected.
-The type key can be parsed as a key in the schema or directly.
+## <li>Validators</li>
 
+<strong>Validators</strong> are basically properties that allows you setup your prefered structure for every key par value.
+- type
+- required
+- minLength & maxLength 
+- minNumber & maxNumber
+- enum
+### Type
+> <i><b>Default:</b> no default value </i>
+> <i><b>NOTE:</b> this property is mandatory (required)</i>
+> <i><b>Works with:</b> all types of data </i>
+> <i><b>Usage</b>: type: "string"</i>
+
+the Type property is the only required property in the schema, it states what type of data is expected.
+The type property can be parsed as a property in the schema or directly.
 
 ```js
 // parse type directly
@@ -112,7 +125,7 @@ while declearing type directly can be simpler and easier to read, it doesnt allo
 
 if the value parsed to the valdate method does not meet the type requirements the returned value will be populated with a type error.
 
-#### Example of a type error
+#### examples
 
 ```javascript
 const { Schema } = require('json-validace')
@@ -124,8 +137,8 @@ const loginSchema = new Schema({
 
 // validate the login object
 const validate = loginSchema.validate({
-    email: "slickcodes@mail",
-    password: 59489483
+    email: "slickcodes@mail", // this should be an email
+    password: 59489483 // this should be a valid string
 })
 
 console.log(validate)
@@ -146,18 +159,319 @@ console.log(validate)
 
 To prevent error message like the one above we'll need to parse in the correct type.
 
-### Available types
+#### Types table
 
-| S/N | Types  | Example        | Description                         |
-|-----|--------|----------------|-------------------------------------|
-| 1   | string  | Hello Word       |  this is any sequence of character
-| 2   | email   | test@gmail.com   | email is a sub-type of string, it detects if the parsed value is a valid email address
-| 3   | number  | 59               | the number type checks if the parsed value is a valid number, NOTE: floats and any falsy or truty data are also considered as valid number.
-| 4   | float   | 49.5             | floats is a sub-type of number and it checks if the value parsed in is a valid floating point number.
-| 5   | boolean | true             | boolean is type checks if the parsed data is a valid boolean value, a good example can be using true, false or an expression like 59 > 3
-| 6   | date    | 1997-10-17       | date is a sub-type of string and it checks if the parsed data is a valid date type, it uses the YYYY-MM-DD configuration and it will work with any javascript date object like the date number (1671987916618) or (2022-12-25T17:05:33.957Z)
-| 7   | array   | ["Paul", "Mike"] | array checks if the parsed in value is a valid array, depending on your schema you can also validate the value if the array is an array of object.
-| 8   | object  | {author: "Paul"} | object type check if the data parsed is a valid object literal
-| 9   | jwt     |  eyJhbGciOiJIUzI1NiIsInR5c<br>CI6IkpXVCJ9.eyJzdWIiOiI<br>xMjM0NTY3ODkwIiwibmFtZSI6 <br> IkpvaG4gRG9lIiwiaWF0Ij<br>oxNTE2MjM5MDIyfQ<br>.SflKxwRJSMeKKF2QT4fwp<br>MeJf36POk6yJV_adQssw5c                 | JWT (JSON Web Token) is a sub-type of string and it checks if the parsed string meets the JWT standard.
-| 10  | mongoid | 507f191e810c19729de860ea | the mongoId type is a sub-type of string and it checks if the string provided is a valid mongoID.
+| S/N | Types   | Example                                                                                                                                                                               | Description                                                                                                                                                                                                                                  |
+| --- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | string  | Hello Word                                                                                                                                                                            | this is any sequence of character                                                                                                                                                                                                            |
+| 2   | email   | test@gmail.com                                                                                                                                                                        | email is a sub-type of string, it detects if the parsed value is a valid email address                                                                                                                                                       |
+| 3   | number  | 59                                                                                                                                                                                    | the number type checks if the parsed value is a valid number, NOTE: floats and any falsy or truty data are also considered as valid number.                                                                                                  |
+| 4   | float   | 49.5                                                                                                                                                                                  | floats is a sub-type of number and it checks if the value parsed in is a valid floating point number.                                                                                                                                        |
+| 5   | boolean | true                                                                                                                                                                                  | boolean is type checks if the parsed data is a valid boolean value, a good example can be using true, false or an expression like 59 > 3                                                                                                     |
+| 6   | date    | 1997-10-17                                                                                                                                                                            | date is a sub-type of string and it checks if the parsed data is a valid date type, it uses the YYYY-MM-DD configuration and it will work with any javascript date object like the date number (1671987916618) or (2022-12-25T17:05:33.957Z) |
+| 7   | array   | ["Paul", "Mike"]                                                                                                                                                                      | array checks if the parsed in value is a valid array, depending on your schema you can also validate the value if the array is an array of object.                                                                                           |
+| 8   | object  | {author: "Paul"}                                                                                                                                                                      | object type check if the data parsed is a valid object literal                                                                                                                                                                               |
+| 9   | jwt     | eyJhbGciOiJIUzI1NiIsInR5c<br>CI6IkpXVCJ9.eyJzdWIiOiI<br>xMjM0NTY3ODkwIiwibmFtZSI6 <br> IkpvaG4gRG9lIiwiaWF0Ij<br>oxNTE2MjM5MDIyfQ<br>.SflKxwRJSMeKKF2QT4fwp<br>MeJf36POk6yJV_adQssw5c | JWT (JSON Web Token) is a sub-type of string and it checks if the parsed string meets the JWT standard.                                                                                                                                      |
+| 10  | mongoid | 507f191e810c19729de860ea                                                                                                                                                              | the mongoId type is a sub-type of string and it checks if the string provided is a valid mongoID.                                                                                                                                            |
 
+
+### Required
+> <i><b>Default:</b> required: false </i>
+> <i><b>Works with:</b> all types of data </i>
+> <i> <b>works with</b>: every type of data</i>
+> <i><b>Usage</b>: required: true (required: boolean)</i>
+
+
+when the <strong>required</strong> property takes in a boolean value, when this property is used, an error will be thrown if the parsed object does not have the key.
+
+#### example
+
+```javascript
+const { Schema } = require("json-validace")
+// registering the login schema
+const signupSchema = new Schema({
+    firstName: { type: "string", required: true },
+    lastName: { type: "string", required: true },
+    surname: { type: "string", required: false },
+    username: { type: "string", default: "anonymous" },
+    dateOfBirth: { type: "date", required: false },
+    gender: {
+        type: "string",
+        required: true,
+    }
+})
+// validating the login object
+const result = signupSchema.validate({})
+
+console.log(result)
+```
+
+```bash 
+# BASH: output
+{
+  error: {
+    lastName: { required: '"lastName" feild is required!' },
+    gender: { required: '"gender" feild is required!' }
+  },
+  isValid: false,
+  data: null
+}
+```
+the above code shows us what happens with a required value is not parsed in. An error was only generate for the lastName and gender key, and other keys passed the check even though they where not provided. the firstName did not generate any error because it was provided.
+
+### Max Length & Min Length
+> <i> <b>works with</b>: strings & arrays</i>
+> <i><b>Usage</b>: maxLength: 30</i>
+> <i><b>Usage</b>: minLength: 8</i>
+> <i><b>Default</b>: maxLength: Infinity; minLength: Infinity</i>
+
+The <strong>maxLength & minLength</strong> properties helps determin the length of the string or array provided.
+if the length of the value provided exceeds the <strong>maxLength</strong> then you'll get an error and if it's below the <strong>minLength</strong> you'll get an error.
+
+#### examples
+```javascript 
+const { Schema } = require("json-validace")
+
+// registering the login schema
+const loginSchema = new Schema({
+    email: { type: "email", required: true },
+    password: { type: "string", required: true, maxLength: 20, minLength: 8 }
+})
+// validating the login object
+const result = loginSchema.validate({
+    email: "test@gmail.com",
+    password: "food" // length = 4
+})
+console.log(result)
+
+```
+```bash 
+# BASH: output
+{
+  error: {
+    password: { minLength: 'password should be 8 characters or above' }
+  },
+  isValid: false,
+  data: null
+}
+```
+The above code generated an error because the password did not meet the minLength requirement of 8 characters or below.
+
+
+```javascript 
+const { Schema } = require("./src")
+
+const studentSchema = new Schema({
+    name: { type: "string", required: true },
+    id: { type: "number", required: true },
+    essey: {
+        type: "string",
+        required: true,
+        minLength: 500,
+        maxLength: 1000
+    },
+    hobbies: {
+        type: "array",
+        maxLength: 3
+    }
+})
+// validating the login object
+const result = studentSchema.validate({
+    name: "John Doe",
+    id: 4934,
+    essey: "Introduction: Exercise is an essential part of a healthy lifestyle, and it offers numerous physical and mental benefits. Studies have shown that regular exercise can help reduce the risk of chronic",
+    hobbies: ["Football", "Video Games", "Coding", "Dancing"]
+})
+console.log(result)
+
+```
+
+
+```bash
+# BASH: Output
+{
+  error: {
+    essey: { minLength: 'essey should be 500 characters or above' },
+    hobbies: { minLength: ' hobbies should be 3 items or below. ' }
+  },
+  isValid: false,
+  data: null
+}
+```
+the above code shows you how the minLength can also be used on arrays.
+
+### Enum
+> <i><b>Default:</b> no default value </i>
+> <i><b>Works with:</b> Boolean, Strings, JWT, mongoId, Number, Floats</i>
+> <i><b>NOTE:</b> this will not work with arrays object and date</i>
+> <i><b>Usage</b>: enum: ["rice", "mike", 4, true]</i>
+
+<strong>Enum</strong> ensures the provided value exist within a range of values. i found that this is useful when you want to specify things like the gender of a person.
+
+#### examples
+```javascript
+const { Schema } = require("./src")
+
+const studentSchema = new Schema({
+    name: { type: "string", required: true },
+    id: { type: "number", required: true },
+    favColor: {
+        type: "string",
+        enum: ["red", "green", "blue", "purple"]
+    }
+})
+// validating the login object
+const result = studentSchema.validate({
+    name: "John Doe",
+    id: 4934,
+    favColor: "white"
+})
+console.log(result)
+
+```
+```bash 
+# BASH: Output
+{
+  error: {
+    favColor: {
+      enum: ' favColor should be an enum of (red | green | blue | purple)'
+    }
+  },
+  isValid: false,
+  data: null
+}
+
+```
+
+### maxNumber & minNumber 
+> <i><b>Default:</b> no default value </i>
+> <i><b>Works with:</b> Numbers and floats</i>
+> <i><b>Usage</b>: maxNumber: 20</i>
+> <i><b>Usage</b>: minNumber: 10</i>
+
+ <b>maxNumber and minNumber</b> are used to specify the number range allowed and will return an error if provided value does not meet the range, this is expecially useful when specifying age.
+
+```javascript
+
+const { Schema } = require("./src")
+
+const ageRange = new Schema({
+    age: {
+        type: "number",
+        required: true,
+        minNumber: 18,
+        maxNumber: 40
+    }
+})
+
+
+console.log(ageRange.validate({ age: 30 }))
+console.log(ageRange.validate({ age: 10 }))
+console.log(ageRange.validate({ age: 44 }))
+console.log(ageRange.validate({ age: 18 }))
+
+```
+
+```bash
+# BASH: Output
+{ error: null, isValid: true, data: { age: 30 } }
+{
+  error: { age: { maxNumber: ' age is lower than 18' } },
+  isValid: false,
+  data: null
+}
+{
+  error: { age: { minNumber: 'age is higher than 40' } },
+  isValid: false,
+  data: null
+}
+{ error: null, isValid: true, data: { age: 18 } }
+```
+## <li>Modifiers</li>
+
+<strong>Modifiers</strong> allow you to make changes to the value parsed, examples of Modifiers.
+
+<!-- - func -->
+<!-- trim -->
+- toLower
+- toUpper
+- default
+
+### toLower & toUpper
+> <i><b>Default:</b> no default value </i>
+> <i><b>Works with:</b> Boolean, Strings, JWT, mongoId, Number, Floats</i>
+> <i><b>NOTE:</b> this will not work with arrays object and date</i>
+> <i><b>Usage</b>: toLower: true</i>
+
+the toLower is used to convert the provided text to lowercase while the toUpper transforms the provided text to uppercase. unlike the maxLength and minLength, the toLower and toUpper cannot be used together on a single key, only one can be used at a time.
+
+```javascript
+
+const { Schema } = require("./src")
+
+const email = new Schema({
+    email: {
+        type: "email",
+        required: true,
+        toLower: true
+    },
+    username: {
+        type: "string",
+        required: true,
+        toUpper: true
+    }
+})
+
+const result = email.validate({
+    email: "TEST@GMAIL.COM",
+    "slickcodes"
+})
+
+console.log(result)
+
+```
+
+```bash
+# BASH: Output
+{ error: null, isValid: true, data: { email: 'test@gmail.com', username: "SLICKCODES" } }
+```
+
+The above code show how the provided values will change. 
+> <b>NOTE</b>: the change happens before any kind of validation 
+
+
+## Default
+the <b>default</b> property sets a value if a value is not provided. this also means that it will not return an error even if it's required, rather it will populate the key with a value.
+
+```javascript
+const { Schema } = require("./src")
+
+const detailSchema = new Schema({
+    email: {
+        type: "email",
+        required: true,
+        toLower: true
+    },
+    username: {
+        type: "string",
+        default: "anonymous"
+    }
+})
+
+const result = detailSchema.validate({
+    email: "TEST@GMAIL.COM"
+})
+
+
+console.log(result)
+
+```
+
+```bash
+# BASH: Output
+{
+  error: null,
+  isValid: true,
+  data: { email: 'test@gmail.com', username: 'anonymous' }
+}
+```
