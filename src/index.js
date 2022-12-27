@@ -154,7 +154,7 @@ const Schema = class {
             // Handle: Enum
             if (schemaData.enum && !Array.isArray(schemaData.enum))
                 error = this.#setError(schemaKey, error, { // error handling
-                    msc: `${schemaKey}.enum should be an array`
+                    misc: `${schemaKey}.enum should be an array`
                 })
             else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, { // error handling
