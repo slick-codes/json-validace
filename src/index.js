@@ -1,7 +1,8 @@
 const validator = require('validator')
 
-/***
- * @param {schema} schema the schema that states the validation
+/**
+ * @param   {schema} schema  the 
+ * @returns instance of Schema
  */
 const Schema = class {
     constructor(schema, configuration) {
@@ -24,6 +25,11 @@ const Schema = class {
             // default configuration
             preventUnregisteredKeys: true
         }
+    }
+    #setPlaceholder(string, placeholder) {
+        return string.replace(/%value%/g, placeholder.value)
+            .replace(/%key%/g, placeholder.key)
+            .replace(/%property%/g, placeholder.property)
     }
     /***
      * @param {object} objectData this is a key pair value that will be validated 
@@ -48,15 +54,32 @@ const Schema = class {
             const dataValue = objectData[schemaKey]
             let schemaData = schema[schemaKey]
 
-            // check if schema has type 
-            if (typeof schemaData !== 'string' && !schemaData.type)
-                error = this.#setError(schemaKey, error, { // error handling
-                    type: ` "${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
-                })
-
-            // set key to object if key value is type
-            if (typeof schemaData === 'string')
+            // set key to object if type is set directly
+            if (typeof schemaData === 'string' || Array.isArray(schemaData))
                 schemaData = { type: schemaData }
+
+            // customError
+            let customError = {}
+
+            // dynamically assign custom error to customError object
+            Object.keys(schemaData).forEach(property => {
+                if (Array.isArray(schemaData[property])) {
+                    customError = {
+                        ...customError, [`${property}Error`]: this.#setPlaceholder(schemaData[property][1], {
+                            value: dataValue,
+                            property: property,
+                            key: schemaKey
+                        })
+                    }
+                    schemaData[property] = schemaData[property][0]
+                }
+            })
+
+            // check if schema has type 
+            if (!schemaData.type)
+                error = this.#setError(schemaKey, error, { // error handling
+                    type: customError.typeError ? customError.typeError : `"${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
+                })
 
             // check if the schema key exist in the data
             const valueExist = Object.keys(objectData).includes(schemaKey)
@@ -68,17 +91,17 @@ const Schema = class {
                     const typeCheck = this.#typeValidation(schemaData.type, dataValue)
                     if (!typeCheck && valueExist)
                         error = this.#setError(schemaKey, error, { // error handling
-                            type: ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
+                            type: customError.typeError ? customError.typeError : ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
                         })
                 }
             } else if (typeof schemaData !== 'string') {
                 error = this.#setError(schemaKey, error, { // error handling
-                    type: `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
+                    type: customError.typeError ? customError.typeError : `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
                 })
             }
             else {
                 error = this.#setError(schemaKey, error, { // error handling
-                    type: `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
+                    type: customError.typeError ? customError.typeError : `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
                 })
             }
 
@@ -96,12 +119,12 @@ const Schema = class {
             if (schemaData.type === "array" && schemaData.$_data) {
                 if (!Array.isArray(schemaData.$_data))
                     error = this.#setError(schemaKey, error, { // error handling
-                        type: ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
+                        type: ustomError.typeError ? customError.typeError : ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
                     })
 
                 if (!Array.isArray(dataValue)) {
                     error = this.#setError(schemaKey, error, { // error handling
-                        type: ` "${schemaKey}" should be an array of object`,
+                        type: ustomError.typeError ? customError.typeError : ` "${schemaKey}" should be an array of object`,
                     })
                 } else for (let object of dataValue) {
                     this.nestedSchema = schemaData.$_data[0]
@@ -121,7 +144,7 @@ const Schema = class {
             // Handle Required feild
             if (schemaData.required && !objectData[schemaKey])
                 error = this.#setError(schemaKey, error, { // error handling
-                    required: `"${schemaKey}" feild is required!`,
+                    required: customError.requiredError ? customError.requiredError : `"${schemaKey}" feild is required!`,
                 })
 
             // Handle minLength && maxLength
