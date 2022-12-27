@@ -1,5 +1,8 @@
 const validator = require('validator')
 
+/***
+ * @param {schema} schema the schema that states the validation
+ */
 const Schema = class {
     constructor(schema, configuration) {
         this.schema = schema ?? {}
@@ -22,7 +25,10 @@ const Schema = class {
             preventUnregisteredKeys: true
         }
     }
-
+    /***
+     * @param {object} objectData this is a key pair value that will be validated 
+     * @param {function} callback an optional callback function 
+     */
     validate(objectData, callback) {
         const schema = this.nestedSchema ?? this.schema
         let error = {}
@@ -169,6 +175,7 @@ const Schema = class {
             // Handle validate function
             if (typeof schemaData.validate === 'function')
                 schemaData.validate(dataValue)
+            // TODO: setup error handling for all function
         }
 
         this.nestedSchema = null
@@ -217,7 +224,7 @@ const Schema = class {
             return Array.isArray(value)
         // check if value is a valid email
         else if (type === 'email')
-            return validator.isEmail(value)
+            return validator.isEmail(value ? value : "")
         //  check if value is a jwt
         else if (type === 'jwt')
             return validator.isJWT(value)
