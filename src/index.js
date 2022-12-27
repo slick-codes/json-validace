@@ -127,12 +127,12 @@ const Schema = class {
             // Handle minLength && maxLength
             if (schemaData.minLength && dataValue?.length < schemaData.minLength)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minLength: `${schemaKey} should be ${schemaData.minLength} characters or above`
+                    minLength: `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
                 })
             // Handle maxLength
             if (schemaData.maxLength && dataValue?.length > schemaData.maxLength)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minLength: ` ${schemaKey} should be ${schemaData.maxLength} characters or below. `
+                    minLength: ` ${schemaKey} should be ${schemaData.maxLength} ${schemaData.type === 'array' ? 'items' : "characters"} or below. `
                 })
 
             // validate minValue and maxValue
@@ -179,17 +179,17 @@ const Schema = class {
         }
 
         this.nestedSchema = null
-
+        this.error = {}
         if (typeof callback === 'function')
             return callback(
                 Object.keys(error).length === 0 ? null : error,
-                Object.keys(this.error).length === 0,
-                Object.keys(this.error).length === 0 ? objectData : null)
+                Object.keys(error).length === 0,
+                Object.keys(error).length === 0 ? objectData : null)
         else
             return {
                 error: Object.keys(error).length === 0 ? null : error,
-                isValid: Object.keys(this.error).length === 0,
-                data: Object.keys(this.error).length === 0 ? objectData : null
+                isValid: Object.keys(error).length === 0,
+                data: Object.keys(error).length === 0 ? objectData : null
             }
     }
 
