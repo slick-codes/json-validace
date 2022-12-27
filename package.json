@@ -11,9 +11,13 @@
     "url": "git+https://github.com/slick-codes/json-validace.git"
   },
   "keywords": [
-    "node.js",
-    "react.js",
-    "vue.js"
+    "json-validation",
+    "json",
+    "object-validation",
+    "nested-object",
+    "nested-arrays",
+    "array-validation",
+    "array"
   ],
   "author": "Paul Ezekiel-Hart",
   "license": "ISC",
