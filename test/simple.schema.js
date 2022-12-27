@@ -1,68 +1,89 @@
-const jsonValidace = require('./../src/')
-
+const jsonValidace = require("./../src/");
 
 const options = {
-    preventUnregisteredKeys: true
-}
+  preventUnregisteredKeys: true,
+};
 
-module.exports.loginForm = new jsonValidace.Schema({
+module.exports.loginForm = new jsonValidace.Schema(
+  {
     password: {
-        type: "string",
-        required: true,
-        maxLength: 20,
-        minLength: 8
+      type: "string",
+      required: true,
+      maxLength: 20,
+      minLength: 8,
     },
     email: {
-        type: "email",
-        required: true
-    }
-}, options)
+      type: "email",
+      required: true,
+    },
+  },
+  options
+);
 
-
-module.exports.signupSchema = new jsonValidace.Schema({
+module.exports.signupSchema = new jsonValidace.Schema(
+  {
     firstName: {
-        type: "string",
-        required: true
+      type: "string",
+      required: true,
     },
     lastName: {
-        type: "string",
-        required: true
+      type: "string",
+      required: true,
     },
     password: {
-        type: "string",
-        maxLength: 20,
-        minLength: 8,
-        required: true
+      type: "string",
+      maxLength: 20,
+      minLength: 8,
+      required: true,
     },
     username: {
-        type: "string",
-        default: "anonymous"
+      type: "string",
+      default: "anonymous",
     },
     email: {
-        type: "email",
-        required: true
+      type: "email",
+      required: true,
     },
     hobbies: {
-        type: "array",
-        required: true
+      type: "array",
+      required: true,
     },
     skinTone: {
-        type: "string",
-        toLower: true,
-        enum: ["black", "white", "brown"]
+      type: "string",
+      toLower: true,
+      enum: ["black", "white", "brown"],
     },
     height: {
-        type: "float"
+      type: "float",
     },
     gender: {
-        type: "string",
-        required: true,
-        toLower: true,
-        enum: ["male", "female"]
+      type: "string",
+      required: true,
+      toLower: true,
+      enum: ["male", "female"],
     },
     dateOfBirth: {
-        type: "date",
-        required: true
-    }
+      type: "date",
+      required: true,
+    },
+  },
+  options
+);
 
-}, options)
+module.exports.musicObject = new jsonValidace.Schema(
+  {
+    name: {
+      type: "string",
+      required: true,
+    },
+    genres: {
+      type: "array",
+      required: true,
+    },
+    date: {
+      type: "date",
+      required: true,
+    },
+  },
+  options
+);
