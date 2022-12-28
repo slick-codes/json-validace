@@ -1,4 +1,4 @@
-const simpleSchemas = require('./simple.schema')
+const simpleSchemas = require('./schema/simple.schema')
 
 // test: login form with no errors
 test("Sucess ~ Login Form", () => {
