@@ -95,7 +95,7 @@ test("Success ~ Array type is valid", () => {
   expect(
     simpleSchemas.musicObject.validate({
       name: "Rema",
-      genres: ["Divine", "Woman", "Dumebi"],
+      songs: ["Divine", "Woman", "Dumebi"],
       date: "2018-10-06",
     })
   ).toEqual({
@@ -103,7 +103,7 @@ test("Success ~ Array type is valid", () => {
     isValid: true,
     data: {
       name: "Rema",
-      genres: ["Divine", "Woman", "Dumebi"],
+      songs: ["Divine", "Woman", "Dumebi"],
       date: "2018-10-06",
     },
   });
