@@ -196,7 +196,7 @@ const Schema = class {
                 objectData[schemaKey] = objectData[schemaKey].trimRight()
             }
             // check if value matches regular expression
-            if (schemaData.regEx && !schemaData.regEx.test(objectData[schemaKey]))
+            if (schemaData.regEx && schemaData.type === "string" && !schemaData.regEx.test(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, {
                     whitespace: customError.regExError ? customError.regExError : `"${dataValue}" does not match the regex`
                 })
