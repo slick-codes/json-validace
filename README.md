@@ -92,6 +92,7 @@ Properties & methods are the foundation of this library as they help specify the
 - minLength & maxLength 
 - minNumber & maxNumber
 - enum
+- whitespace
 ### Type
 > <i><b>Default:</b> no default value </i>
 > <i><b>NOTE:</b> this property is mandatory (required)</i>
@@ -396,6 +397,8 @@ console.log(ageRange.validate({ age: 18 }))
 - toLower
 - toUpper
 - default
+- trim , trimLeft, trimRight
+
 
 ### toLower & toUpper
 > <i><b>Default:</b> no default value </i>
