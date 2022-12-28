@@ -76,7 +76,7 @@ module.exports.musicObject = new jsonValidace.Schema(
       type: "string",
       required: true,
     },
-    genres: {
+    songs: {
       type: "array",
       required: true,
     },
