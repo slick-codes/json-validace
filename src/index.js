@@ -137,6 +137,14 @@ const Schema = class {
 
             }
 
+            // check for whitespace error
+            if (schemaData.whitespace === false &&
+                dataValue &&
+                objectData[schemaKey].split(' ').length > 1)
+                error = this.#setError(schemaKey, error, {
+                    whitespace: customError.whitespaceError ? customError.whitespaceError : `${schemaKey} should have no whitespace`
+                })
+
             // handle default 
             if (schemaData.default && !dataValue)
                 objectData[schemaKey] = schemaData.default
@@ -169,11 +177,25 @@ const Schema = class {
                 })
 
             // Handle: cases lower and upper
-            if (schemaData.toLower) {
+            if (schemaData.toLower && schemaData.type == 'string') {
                 objectData[schemaKey] = objectData[schemaKey].toLowerCase()
             }
-            else if (schemaData.toUpper)
+            else if (schemaData.toUpper && schemaData.type == 'string')
                 objectData[schemaKey] = objectData[schemaKey].toUpperCase()
+
+            // trim text
+            if (dataValue && schemaData.type === 'string' && schemaData.trim) {
+                objectData[schemaKey] = objectData[schemaKey].trim()
+            }
+            // trim text
+            if (dataValue && schemaData.type === 'string' && schemaData.trimLeft) {
+                objectData[schemaKey] = objectData[schemaKey].trimLeft()
+            }
+            // trim text
+            if (dataValue && schemaData.type === 'string' && schemaData.trimRight) {
+                objectData[schemaKey] = objectData[schemaKey].trimRight()
+            }
+
 
             // Handle data modification (midifyValue) feild
             if (typeof schemaData.modifyValue === 'function')
