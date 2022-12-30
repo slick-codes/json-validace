@@ -28,8 +28,8 @@ const Schema = class {
     }
     #setPlaceholder(string, placeholder) {
         return string.replace(/%value%/g, placeholder.value || "")
-            .replace(/%key%/g, placeholder.key)
-            .replace(/%property%/g, placeholder.property)
+            .replace(/%key%/g, placeholder.key || "")
+            .replace(/%property%/g, placeholder.property || "")
     }
 
     #createErrorObject(customError, value, property, key, schema) {
@@ -82,8 +82,8 @@ const Schema = class {
             // dynamically assign custom error to customError object
             Object.keys(schemaData).forEach(property => {
                 if (
-                    (Array.isArray(schemaData[property]) && property !== 'enum') ||
-                    (property === 'enum' && Array.isArray(schemaData[property][0]))
+                    (Array.isArray(schemaData[property]) && property !== 'enum' && property !== "$_data") ||
+                    (property === 'enum' && Array.isArray(schemaData[property][0] && property !== "$_data"))
                 ) {
                     customError = this.#createErrorObject(customError, dataValue, property, schemaKey, schemaData)
                     schemaData[property] = schemaData[property][0]
@@ -139,12 +139,12 @@ const Schema = class {
 
                 if (!Array.isArray(dataValue)) {
                     error = this.#setError(schemaKey, error, { // error handling
-                        type: ustomError.typeError ? customError.typeError : ` "${schemaKey}" should be an array of object`,
+                        type: customError.typeError ? customError.typeError : ` "${schemaKey}" should be an array of object`,
                     })
                 } else for (let object of dataValue) {
                     this.nestedSchema = schemaData.$_data[0]
                     const result = this.validate(object)
-                    if (Object.keys(result.error).length > 0) {
+                    if (Object.keys(result.error || {}).length > 0) {
                         error = { ...error, [schemaKey]: [result.error] }
                     }
                     this.nestedSchema = null
@@ -230,8 +230,6 @@ const Schema = class {
                 error = this.#setError(schemaKey, error, { // error handling
                     enum: customError.enumError ? customError.enumError : ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
                 })
-
-
 
 
             // Handle validate function
