@@ -31,6 +31,17 @@ const Schema = class {
             .replace(/%key%/g, placeholder.key)
             .replace(/%property%/g, placeholder.property)
     }
+
+    #createErrorObject(customError, value, property, key, schema) {
+        return {
+            ...customError,
+            [`${property}Error`]: this.#setPlaceholder(schema[property][1], {
+                value,
+                property,
+                key
+            })
+        }
+    }
     /***
      * @param {object} objectData this is a key pair value that will be validated 
      * @param {function} callback an optional callback function 
@@ -63,14 +74,11 @@ const Schema = class {
 
             // dynamically assign custom error to customError object
             Object.keys(schemaData).forEach(property => {
-                if (Array.isArray(schemaData[property])) {
-                    customError = {
-                        ...customError, [`${property}Error`]: this.#setPlaceholder(schemaData[property][1], {
-                            value: dataValue,
-                            property: property,
-                            key: schemaKey
-                        })
-                    }
+                if (
+                    (Array.isArray(schemaData[property]) && property !== 'enum') ||
+                    (property === 'enum' && Array.isArray(schemaData[property][0]))
+                ) {
+                    customError = this.#createErrorObject(customError, dataValue, property, schemaKey, schemaData)
                     schemaData[property] = schemaData[property][0]
                 }
             })
@@ -198,7 +206,7 @@ const Schema = class {
             // check if value matches regular expression
             if (schemaData.regEx && schemaData.type === "string" && !schemaData.regEx.test(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, {
-                    whitespace: customError.regExError ? customError.regExError : `"${dataValue}" does not match the regex`
+                    whitespace: customError.whitespaceError ? customError.whitespaceError : `"${dataValue}" does not match the regex`
                 })
 
             // Handle data modification (midifyValue) feild
@@ -209,11 +217,11 @@ const Schema = class {
             // Handle: Enum
             if (schemaData.enum && !Array.isArray(schemaData.enum))
                 error = this.#setError(schemaKey, error, { // error handling
-                    misc: `${schemaKey}.enum should be an array`
+                    enum: customError.enumError ? customError.enumError : `SchemaError: should be an array`
                 })
             else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, { // error handling
-                    enum: ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
+                    enum: customError.enumError ? customError.enumError : ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
                 })
 
 
