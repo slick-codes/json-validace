@@ -152,13 +152,6 @@ const Schema = class {
 
             }
 
-            // check for whitespace error
-            if (schemaData.whitespace === false &&
-                dataValue &&
-                objectData[schemaKey].split(' ').length > 1)
-                error = this.#setError(schemaKey, error, {
-                    whitespace: customError.whitespaceError ? customError.whitespaceError : `${schemaKey} should have no whitespace`
-                })
 
             // handle default 
             if (schemaData.default && !dataValue)
@@ -210,10 +203,18 @@ const Schema = class {
             if (dataValue && schemaData.type === 'string' && schemaData.trimRight) {
                 objectData[schemaKey] = objectData[schemaKey].trimRight()
             }
-            // check if value matches regular expression
-            if (schemaData.regEx && schemaData.type === "string" && !schemaData.regEx.test(objectData[schemaKey]))
+            // check for whitespace error
+            if (schemaData.whitespace === false &&
+                dataValue &&
+                objectData[schemaKey].split(' ').length > 1)
                 error = this.#setError(schemaKey, error, {
-                    whitespace: customError.whitespaceError ? customError.whitespaceError : `"${dataValue}" does not match the regex`
+                    whitespace: customError.whitespaceError ? customError.whitespaceError : `${schemaKey} should have no whitespace`
+                })
+
+            // check if value matches regular expression
+            if (schemaData.match && schemaData.type === "string" && !schemaData.match.test(objectData[schemaKey]))
+                error = this.#setError(schemaKey, error, {
+                    match: customError.matchError ? customError.matchError : `"${dataValue}" does not match the regex`
                 })
 
             // Handle data modification (midifyValue) feild
