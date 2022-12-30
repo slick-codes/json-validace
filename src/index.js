@@ -27,7 +27,7 @@ const Schema = class {
         }
     }
     #setPlaceholder(string, placeholder) {
-        return string.replace(/%value%/g, placeholder.value)
+        return string.replace(/%value%/g, placeholder.value || "")
             .replace(/%key%/g, placeholder.key)
             .replace(/%property%/g, placeholder.property)
     }
@@ -47,6 +47,7 @@ const Schema = class {
      * @param {function} callback an optional callback function 
      */
     validate(objectData, callback) {
+
         const schema = this.nestedSchema ?? this.schema
         let error = {}
 
@@ -64,6 +65,12 @@ const Schema = class {
         for (let schemaKey of schemaKeys) {
             const dataValue = objectData[schemaKey]
             let schemaData = schema[schemaKey]
+
+            const setPlaceholder = (string, property) => {
+                return string.replace(/%value%/g, objectData[schemaKey])
+                    .replace(/%key%/g, schemaKey)
+                    .replace(/%property%/g, property)
+            }
 
             // set key to object if type is set directly
             if (typeof schemaData === 'string' || Array.isArray(schemaData))
@@ -225,15 +232,31 @@ const Schema = class {
                 })
 
 
-            if (typeof schemaData.func === 'function') {
-                schemaData.func(error[schemaKey], objectData[schemaKey], Object.keys(error).length === 0)
-            }
+
 
             // Handle validate function
-            if (typeof schemaData.validate === 'function')
-                schemaData.validate(dataValue)
-            // TODO: setup error handling for all function
+            if (typeof schemaData.validate === 'function') {
+                const result = schemaData.validate(dataValue)
+                if (!result.isValid) {
+                    error = this.#setError(schemaKey, error, {// error handling 
+                        validate: result.errMessage ? setPlaceholder(result.errMessage, 'validate') : `validate method error!`
+                    })
+                }
+            }
+
+            try {
+                if (typeof schemaData.func === 'function') {
+                    schemaData.func(error[schemaKey], objectData[schemaKey], Object.keys(error).length === 0)
+                }
+
+            } catch (err) {
+                error = this.#setError(schemaKey, error, { // error handling
+                    func: "something went wrong!" + err
+                })
+            }
+
         }
+
 
         this.nestedSchema = null
         this.error = {}
