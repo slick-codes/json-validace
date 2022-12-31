@@ -80,7 +80,7 @@ test("Failed ~ Signup form: (test: required, email, array with no $_data, dateOf
     ).toEqual({
         error: {
             firstName: { required: '"firstName" feild is required!' },
-            password: { minLength: " password should be 20 characters or below. " },
+            password: { maxLength: " password should be 20 characters or below. " },
             email: { type: ' "email" value is not a email' },
             skinTone: {
                 enum: " skinTone should be an enum of (black | white | brown)",
