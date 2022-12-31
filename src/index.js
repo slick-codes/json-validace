@@ -246,7 +246,7 @@ const Schema = class {
             if (typeof schemaData.func === 'function')
                 schemaData.func({
                     error: error[schemaKey] || null,
-                    allErrors: Object.keys(error).length ? error : null,
+                    errors: Object.keys(error).length ? error : null,
                     key: schemaKey,
                     value: objectData[schemaKey],
                     errorMessages: Object.values(error[schemaKey] || {}),
