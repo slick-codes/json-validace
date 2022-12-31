@@ -1,6 +1,6 @@
 {
   "name": "json-validace",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Json-Validace allows you validate JSON/Javascript Object using a structred Object schema",
   "main": "src/index.js",
   "scripts": {
