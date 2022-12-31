@@ -166,7 +166,7 @@ const Schema = class {
             // Handle minLength && maxLength
             if (schemaData.minLength && dataValue?.length < schemaData.minLength)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minLength: customeError.inLengthError ?? `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
+                    minLength: customError.inLengthError ?? `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
                 })
             // Handle maxLength
             if (schemaData.maxLength && dataValue?.length > schemaData.maxLength)
