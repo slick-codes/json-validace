@@ -64,7 +64,8 @@ const Schema = class {
 
         for (let schemaKey of schemaKeys) {
             const dataValue = objectData[schemaKey]
-            let schemaData = schema[schemaKey]
+            let schemaData = { ...schema[schemaKey] }
+
 
             const setPlaceholder = (string, property) => {
                 return string.replace(/%value%/g, objectData[schemaKey])
@@ -78,7 +79,6 @@ const Schema = class {
 
             // customError
             let customError = {}
-
             // dynamically assign custom error to customError object
             Object.keys(schemaData).forEach(property => {
                 if (
@@ -86,7 +86,7 @@ const Schema = class {
                     (property === 'enum' && Array.isArray(schemaData[property][0] && property !== "$_data"))
                 ) {
                     customError = this.#createErrorObject(customError, dataValue, property, schemaKey, schemaData)
-                    schemaData[property] = schemaData[property][0]
+                    schemaData = { ...schemaData, [property]: schemaData[property][0] }
                 }
             })
 
@@ -101,24 +101,25 @@ const Schema = class {
             const isTypeSupported = this.supportedType.includes(schemaData.type?.toLowerCase())
 
             // Handle Type
-            if (isTypeSupported) {
-                if (!Array.isArray(schemaData.type)) {
-                    const typeCheck = this.#typeValidation(schemaData.type, dataValue)
-                    if (!typeCheck && valueExist)
-                        error = this.#setError(schemaKey, error, { // error handling
-                            type: customError.typeError ?? ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
-                        })
+            if (dataValue) // ensure type error does not appear when required error appears 
+                if (isTypeSupported) {
+                    if (!Array.isArray(schemaData.type)) {
+                        const typeCheck = this.#typeValidation(schemaData.type, dataValue)
+                        if (!typeCheck && valueExist)
+                            error = this.#setError(schemaKey, error, { // error handling
+                                type: customError.typeError ?? ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
+                            })
+                    }
+                } else if (typeof schemaData !== 'string') {
+                    error = this.#setError(schemaKey, error, { // error handling
+                        type: customError.typeError ?? `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
+                    })
                 }
-            } else if (typeof schemaData !== 'string') {
-                error = this.#setError(schemaKey, error, { // error handling
-                    type: customError.typeError ?? `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
-                })
-            }
-            else {
-                error = this.#setError(schemaKey, error, { // error handling
-                    type: customError.typeError ?? `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
-                })
-            }
+                else {
+                    error = this.#setError(schemaKey, error, { // error handling
+                        type: customError.typeError ?? `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
+                    })
+                }
 
             // validate nested obj schemas
             if (schemaData.type === 'object' &&
@@ -166,7 +167,7 @@ const Schema = class {
             // Handle minLength && maxLength
             if (schemaData.minLength && dataValue?.length < schemaData.minLength)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minLength: customError.inLengthError ?? `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
+                    minLength: customError.minLengthError ?? `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
                 })
             // Handle maxLength
             if (schemaData.maxLength && dataValue?.length > schemaData.maxLength)
@@ -315,7 +316,8 @@ const Schema = class {
 }
 
 
-
-exports.default = { Schema };
-module.exports = exports.default;
-module.exports.default = exports.default;
+if (typeof exports !== "undefined") {
+    exports.default = { Schema };
+    module.exports = exports.default;
+    module.exports.default = exports.default;
+}
