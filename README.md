@@ -93,6 +93,8 @@ Properties & methods are the foundation of this library as they help specify the
 - minNumber & maxNumber
 - enum
 - whitespace
+- match
+- validate
 ### Type
 > <i><b>Default:</b> no default value </i>
 > <i><b>NOTE:</b> this property is mandatory (required)</i>
@@ -346,7 +348,7 @@ console.log(result)
 
 ### maxNumber & minNumber 
 > <i><b>Default:</b> no default value </i>
-> <i><b>Works with:</b> Numbers and floats</i>
+> <i><b>Works with:</b> Numbers and floats</i> 
 > <i><b>Usage</b>: maxNumber: 20</i>
 > <i><b>Usage</b>: minNumber: 10</i>
 
@@ -388,6 +390,143 @@ console.log(ageRange.validate({ age: 18 }))
 }
 { error: null, isValid: true, data: { age: 18 } }
 ```
+###whitespace
+> <div><i><b>Type:</b> Property</div>
+> <div><i><b>Default:</b> whitespace: true </i></div>
+> <div><i><b>Works with:</b> string, email,jwt,mongoid</i></div>
+> <div><i><b>Usage</b>: whitespace: true</i></div>
+
+<strong>whitespace</strong> returns an error if the provided string contains a space this is useful if you dont want text to be inside of a feild for example, the clasic username structure does not expect a space between it.
+
+####examples
+
+```javascript 
+const { Schema } = require('json-validace')
+
+
+const login = new Schema({
+    username: {
+        type: "string",
+        required: true,
+        whitespace: false
+    },
+    password: {
+        type: "string",
+        required: true
+    }
+})
+
+const result = login.validate({
+    username: "slick codes",
+    password: "somesortofpassword"
+})
+
+console.log(result)
+```
+
+```bash
+# bash: Output
+{
+  error: { username: { whitespace: 'username should have no whitespace' } },
+  isValid: false,
+  data: null
+}
+```
+
+### Match
+<strong>match</strong> is great if you want to match a provided string against a regular expression. if the porvided string does not match the regular expression then it will return an error.
+> <div><i><b>Type:</b> Property</div>
+> <div><i><b>Default:</b> no default value </i></div>
+> <div><i><b>Works with:</b> string, email,jwt,mongoid</i></div>
+> <div><i><b>Usage:</b> match: /^(?=.*[A-Za-z])(?=.*\d)[?=.*[@$!%*#?&]](A-Za-z\d@$!%*#?&){8,}$/</i></div>
+
+
+```javascript
+const { Schema } = require('json-validace')
+
+
+const login = new Schema({
+    username: {
+        type: "string",
+        required: true,
+        whitespace: false
+    },
+    password: {
+        type: "string",
+        required: true,
+        match: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+    }
+})
+
+const result = login.validate({
+    username: "slickcodes",
+    password: "slick"
+})
+
+console.log(result)
+```
+```bash
+# BASH: Output
+{
+  error: { password: { match: '"slick" does not match the regex' } },
+  isValid: false,
+  data: null
+}
+```
+### validate
+> <div><i><b>Type:</b> Method</div>
+> <div><i><b>Default:</b> no default value </i></div>
+> <div><i><b>Works with:</b> nothing </i></div>
+> <div><i><b>Usage:</b> validate( value ){
+>   <div> 
+>       // some sort of condition
+>   <div>return {isValid: false, errMessage: "custom error message"}</div>
+>  </div>
+> }</i></div>
+>
+
+You can write your own validation using the validate method, the method takes in the value parsed in as a parameter and return an object containing an optional error message.
+
+```javascript 
+const { Schema } = require('json-validace')
+
+
+const login = new Schema({
+    username: {
+        type: "string",
+        required: true,
+        whitespace: false,
+        validate(value) {
+            if (value.length > 10) {
+                return { isValid: true }
+            } else {
+                return { isValid: false, errMessage: "your text is too short" }
+            }
+        }
+    },
+    password: {
+        type: "string",
+        required: true
+    }
+})
+
+const result = login.validate({
+    username: "slickcodes",
+    password: "slick"
+})
+
+console.log(result)
+```
+```bash
+# BASH: Output 
+{
+  error: { username: { validate: 'your text is too short' } },
+  isValid: false,
+  data: null
+}
+```
+The code above checks if the value provided is hiegher than 10, since validate is a function the possiblities are basically endless. 
+set the isValid porperty to true when if the validation is correct, and the opposite is the case if it's false however you can add an additional errMessage property which will act as a custom error message.
 ## <li>Modifiers</li>
 
 <strong>Modifiers</strong> allow you to make changes to the value parsed, examples of Modifiers.
@@ -398,8 +537,7 @@ console.log(ageRange.validate({ age: 18 }))
 - toUpper
 - default
 - trim , trimLeft, trimRight
-
-
+- modifyValue
 ### toLower & toUpper
 > <i><b>Default:</b> no default value </i>
 > <i><b>Works with:</b> Boolean, Strings, JWT, mongoId, Number, Floats</i>
@@ -478,3 +616,47 @@ console.log(result)
   data: { email: 'test@gmail.com', username: 'anonymous' }
 }
 ```
+
+## trim, trimLeft, trimRight
+
+trim is used to remove extra space around text, this works like the trim method in javascript, however this is a porperty that takes in a boolean, when it's set to true it removes the spaces and when it's set to false it ignores it. 
+The Trim porperty by default removes space at the left and right side of a text (string) however you can also use the trimLeft, and a trimRight to specify the direction you want to trim.
+
+### examples
+
+
+```javascript
+const { Schema } = require('./src/')
+
+
+const login = new Schema({
+    username: {
+        type: "string",
+        required: true,
+        whitespace: false,
+        trim: true
+    },
+    password: {
+        type: "string",
+        required: true
+    }
+})
+
+const result = login.validate({
+    username: " slickcodes    ",
+    password: "slick"
+})
+
+console.log(result)
+```
+
+```BASH 
+# BASH: Output
+{
+  error: null,
+  isValid: true,
+  data: { username: 'slickcodes', password: 'slick' }
+}
+```
+
+Notice how the data is valid even though there was too much space, this is because the extra space where removed with trim before the whitespace check, this will be different if the space was between texts.
