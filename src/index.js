@@ -106,17 +106,17 @@ const Schema = class {
                     const typeCheck = this.#typeValidation(schemaData.type, dataValue)
                     if (!typeCheck && valueExist)
                         error = this.#setError(schemaKey, error, { // error handling
-                            type: customError.typeError ? customError.typeError : ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
+                            type: customError.typeError ?? ` "${schemaKey}" value is not a ${schemaData.type ?? 'datatype'}`,
                         })
                 }
             } else if (typeof schemaData !== 'string') {
                 error = this.#setError(schemaKey, error, { // error handling
-                    type: customError.typeError ? customError.typeError : `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
+                    type: customError.typeError ?? `  Syntax Error ~ type is not decleared on "${schemaKey}" property`,
                 })
             }
             else {
                 error = this.#setError(schemaKey, error, { // error handling
-                    type: customError.typeError ? customError.typeError : `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
+                    type: customError.typeError ?? `  Syntax Error ~ "${schemaData.type}" is not a valid type`,
                 })
             }
 
@@ -134,12 +134,12 @@ const Schema = class {
             if (schemaData.type === "array" && schemaData.$_data) {
                 if (!Array.isArray(schemaData.$_data))
                     error = this.#setError(schemaKey, error, { // error handling
-                        type: ustomError.typeError ? customError.typeError : ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
+                        type: customError.typeError ?? ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
                     })
 
                 if (!Array.isArray(dataValue)) {
                     error = this.#setError(schemaKey, error, { // error handling
-                        type: customError.typeError ? customError.typeError : ` "${schemaKey}" should be an array of object`,
+                        type: customError.typeError ?? ` "${schemaKey}" should be an array of object`,
                     })
                 } else for (let object of dataValue) {
                     this.nestedSchema = schemaData.$_data[0]
@@ -160,28 +160,28 @@ const Schema = class {
             // Handle Required feild
             if (schemaData.required && !objectData[schemaKey])
                 error = this.#setError(schemaKey, error, { // error handling
-                    required: customError.requiredError ? customError.requiredError : `"${schemaKey}" feild is required!`,
+                    required: customError.requiredError ?? `"${schemaKey}" feild is required!`,
                 })
 
             // Handle minLength && maxLength
             if (schemaData.minLength && dataValue?.length < schemaData.minLength)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minLength: `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
+                    minLength: customeError.inLengthError ?? `${schemaKey} should be ${schemaData.minLength} ${schemaData.type === 'array' ? 'items' : "characters"} or above`
                 })
             // Handle maxLength
             if (schemaData.maxLength && dataValue?.length > schemaData.maxLength)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minLength: ` ${schemaKey} should be ${schemaData.maxLength} ${schemaData.type === 'array' ? 'items' : "characters"} or below. `
+                    maxLength: customError.maxLengthError ?? ` ${schemaKey} should be ${schemaData.maxLength} ${schemaData.type === 'array' ? 'items' : "characters"} or below. `
                 })
 
             // validate minValue and maxValue
             if (schemaData.minNumber && dataValue > schemaData.maxNumber)
                 error = this.#setError(schemaKey, error, { // error handling
-                    minNumber: `${schemaKey} is higher than ${schemaData.maxNumber}`
+                    minNumber: customError.minNumber ?? `${schemaKey} is higher than ${schemaData.maxNumber}`
                 })
             if (schemaData.maxNumber && dataValue < schemaData.minNumber)
                 error = this.#setError(schemaKey, error, { // error handling
-                    maxNumber: ` ${schemaKey} is lower than ${schemaData.minNumber}`
+                    maxNumber: customError.maxNumber ?? ` ${schemaKey} is lower than ${schemaData.minNumber}`
                 })
 
             // Handle: cases lower and upper
@@ -208,13 +208,13 @@ const Schema = class {
                 dataValue &&
                 objectData[schemaKey].split(' ').length > 1)
                 error = this.#setError(schemaKey, error, {
-                    whitespace: customError.whitespaceError ? customError.whitespaceError : `${schemaKey} should have no whitespace`
+                    whitespace: customError.whitespaceError ?? `${schemaKey} should have no whitespace`
                 })
 
             // check if value matches regular expression
             if (schemaData.match && schemaData.type === "string" && !schemaData.match.test(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, {
-                    match: customError.matchError ? customError.matchError : `"${dataValue}" does not match the regex`
+                    match: customError.matchError ?? `"${dataValue}" does not match the regex`
                 })
 
             // Handle data modification (midifyValue) feild
@@ -225,11 +225,11 @@ const Schema = class {
             // Handle: Enum
             if (schemaData.enum && !Array.isArray(schemaData.enum))
                 error = this.#setError(schemaKey, error, { // error handling
-                    enum: customError.enumError ? customError.enumError : `SchemaError: should be an array`
+                    enum: customError.enumError ?? `SchemaError: should be an array`
                 })
             else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, { // error handling
-                    enum: customError.enumError ? customError.enumError : ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
+                    enum: customError.enumError ?? ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
                 })
 
 
