@@ -243,17 +243,15 @@ const Schema = class {
                 }
             }
 
-            try {
-                if (typeof schemaData.func === 'function') {
-                    schemaData.func(error[schemaKey], objectData[schemaKey], Object.keys(error).length === 0)
-                }
-
-            } catch (err) {
-                error = this.#setError(schemaKey, error, { // error handling
-                    func: "something went wrong!" + err
+            if (typeof schemaData.func === 'function')
+                schemaData.func({
+                    error: error[schemaKey] || null,
+                    allErrors: Object.keys(error).length ? error : null,
+                    key: schemaKey,
+                    value: objectData[schemaKey],
+                    errorMessages: Object.values(error[schemaKey] || {}),
+                    isValid: Object.keys(error[schemaKey] || {}).length === 0
                 })
-            }
-
         }
 
 
