@@ -660,3 +660,55 @@ console.log(result)
 ```
 
 Notice how the data is valid even though there was too much space, this is because the extra space where removed with trim before the whitespace check, this will be different if the space was between texts.
+
+### modifyValue 
+
+The modifyValue method allows you to dynamically modify a value on like other modifiers, modifyValue is a method which means you can write complex expressions and then assign a value to the key.
+
+#### examples
+
+```javascript 
+const { Schema } = require('./src/')
+
+
+const login = new Schema({
+    username: {
+        type: "string",
+        required: true,
+        modifyValue: (value) => value.split(' ').join('-')
+    },
+    password: {
+        type: "string",
+        required: true
+    }
+})
+
+const result = login.validate({
+    username: "slick codes",
+    password: "slick"
+})
+
+console.log(result)
+
+```
+
+```bash
+# BASH: Output
+{
+  error: null,
+  isValid: true,
+  data: { username: 'slick-codes', password: 'slick' }
+}
+```
+
+Notice how the username changed to slick-codes even though the original entry was slickcodes? well this is the flexibility of the modifyValue method.
+
+## func 
+The func method is neigther a validator or a modifyer since it does not require a return startment. however the func method is a very useful method that allows you write additional functionalities, this method is expected to return nothing, but it takes in a data parameter which is an object containing the value,key,isValid,error (error associated with the key), allErrors,errMessages (associated with the key) and a few others.
+
+this is increadibly useful if you want to update the message on your browser or even console for nodejs users.
+
+
+
+
+
