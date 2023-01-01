@@ -704,11 +704,208 @@ console.log(result)
 Notice how the username changed to slick-codes even though the original entry was slickcodes? well this is the flexibility of the modifyValue method.
 
 ## func 
-The func method is neigther a validator or a modifyer since it does not require a return startment. however the func method is a very useful method that allows you write additional functionalities, this method is expected to return nothing, but it takes in a data parameter which is an object containing the value,key,isValid,error (error associated with the key), allErrors,errMessages (associated with the key) and a few others.
+The func method is neigther a validator or a modifyer since it does not requires a return startment. however the func method is a very useful method that allows you write additional functionalities, this method is expected to return nothing, but it takes in a data parameter which is an object containing the value,key,isValid,error (error associated with the key), allErrors,errMessages (associated with the key) and a few others.
 
 this is increadibly useful if you want to update the message on your browser or even console for nodejs users.
 
+```html
+<!-- Svelte -->
+ <script>
+ </script>
 
+<div>
+</div>
 
+<style>
+</style>
 
+```
+above is a Sveltejs scarfold, the following codes is going to be a complete form created using svelte, and of course the json-validace package.
 
+```javascript
+// <script></script>
+  import { Schema } from "json-validace";
+
+  // hold data from the error box in the DOM
+  let errorMessage = {};
+
+// the value of the input a bind to this variables
+  let emailValue = "";
+  let passwordValue = "";
+
+  // create my func function
+// this method will output an error to the DOM
+  function outputError(data) {
+    errorMessage[data.key] = data.errorMessages[0] || "✔️";
+  }
+
+  const loginSchema = new Schema({
+    email: {
+      type: "email",
+      required: [true, "%key% cannot be empty!"], // assigning a custom error using  porperty: [value, custom erorr]
+      func: outputError // attaching outputERror to func in the email param
+    },
+    password: {
+      type: "string",
+      match: [
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+        "%key% is too weak!" // custom error message for the match property
+      ],
+      func: outputError // attaching outputError to fun in the passsword param
+    }
+  });
+
+  // convert "" empty string to undefined to trigger the required erorr, since it only works when there's no value
+  const filterString = string => (string.trim() === "" ? undefined : string);
+
+  // Submit function
+  function submit() {
+    const result = loginSchema.validate({
+      email: filterString(emailValue.value), //this will triger the required error if there's no value, since required considers an empty string a value
+      password: filterString(passwordValue.value)
+    });
+    
+    if (!result.isValid) return event.preventDefault();
+
+    // .. submition code here
+  }
+
+```
+
+The code above is the javascript code and it should be within the <script></script> tag.
+
+```html
+<!-- html -->
+<div class="container">
+    <div class="wrapper">
+        <header>
+            <h1>Login</h1>
+            <p>Login to your account</p>
+        </header>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <form action="" on:submit|preventDefault={ submit }>
+            <input type="text" placeholder="Email" bind:this={emailValue} />
+            <div class="message" class:disable={!errorMessage.password}>{errorMessage.email}</div>
+            <section>
+                <input type={ show? 'text' : 'password' } placeholder="Password" bind:this={passwordValue} />
+                <span class="icon" on:click={ () => show = !show}>
+                    <Icon {show} />
+                </span>
+            </section>
+            <div class="message" class:disable={!errorMessage.password}>{errorMessage.password}</div>
+            <button>Login</button>
+            <a href=".">Forgotten Password?</a>
+        </form>
+    </div>
+</div>
+```
+```css
+/* importing font */
+  @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+  /* global tergetting unique to svelte */
+  :global(*) {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .disable {
+    opacity: 0;
+  }
+  button:active {
+    background: #25074c !important;
+  }
+  a {
+    padding-top: 0.8em;
+  }
+  .message {
+    font-size: 0.77rem;
+  }
+
+  .container {
+    background-color: #360970;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .container .wrapper {
+    background-color: white;
+    width: 30rem;
+    padding: 4rem 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .container .wrapper header p {
+    color: #7c7c7c;
+    font-size: 0.9rem;
+  }
+
+  .container .wrapper form {
+    display: flex;
+    flex-direction: column;
+    /* gap: .5rem; */
+  }
+
+  .container .wrapper form section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-flow: column;
+    width: 100%;
+  }
+
+  form .message {
+    padding: 0.5em 0;
+    height: 1em;
+    padding-bottom: 2.5em;
+  }
+
+  .container .wrapper form section input {
+    width: 100%;
+  }
+
+  .container .wrapper form section .icon {
+    /* justify-self: center; */
+    position: sticky;
+    position: absolute;
+    right: 0;
+    top: 30%;
+    transform: translate(-0.5rem);
+    cursor: pointer;
+  }
+
+  .container .wrapper form input {
+    padding: 1rem;
+    border: 1px solid #7c7c7c;
+    width: 100%;
+  }
+
+  .container .wrapper form input:focus {
+    outline: 1px solid #360970;
+  }
+
+  .container .wrapper form button {
+    color: white;
+    background-color: #360970;
+    border: none;
+    padding: 1rem;
+  }
+
+  .container .wrapper form a {
+    color: #360970;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+```
+
+the form generated by the above code is completely validated with json-validace and it shows how useful the func method is.
