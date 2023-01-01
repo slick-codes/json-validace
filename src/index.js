@@ -93,7 +93,7 @@ const Schema = class {
             // check if schema has type 
             if (!schemaData.type)
                 error = this.#setError(schemaKey, error, { // error handling
-                    type: customError.typeError ? customError.typeError : `"${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
+                    type: customError.typeError ?? `"${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
                 })
 
             // check if the schema key exist in the data
@@ -302,13 +302,13 @@ const Schema = class {
             return Array.isArray(value)
         // check if value is a valid email
         else if (type === 'email')
-            return validator.isEmail(value ? value : "")
+            return validator.isEmail(value ?? "")
         //  check if value is a jwt
         else if (type === 'jwt')
-            return validator.isJWT(value ? value : "")
+            return validator.isJWT(value ?? "")
         // check if value is a valid mongodb id
         else if (type === 'mongoid') {
-            return validator.isMongoId(String(value ? value : ""))
+            return validator.isMongoId(String(value ?? ""))
         }
         else
             return false
