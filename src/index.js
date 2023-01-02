@@ -64,7 +64,7 @@ const Schema = class {
 
         for (let schemaKey of schemaKeys) {
             const dataValue = objectData[schemaKey]
-            let schemaData = { ...schema[schemaKey] }
+            let schemaData = typeof schema[schemaKey] === 'string'? schema[schemaKey] : { ...schema[schemaKey] }
 
 
             const setPlaceholder = (string, property) => {
@@ -74,8 +74,9 @@ const Schema = class {
             }
 
             // set key to object if type is set directly
-            if (typeof schemaData === 'string' || Array.isArray(schemaData))
+            if (typeof schemaData === 'string' || Array.isArray(schemaData)){
                 schemaData = { type: schemaData }
+            }
 
             // customError
             let customError = {}
@@ -91,7 +92,7 @@ const Schema = class {
             })
 
             // check if schema has type 
-            if (!schemaData.type)
+            if (!schemaData.type )
                 error = this.#setError(schemaKey, error, { // error handling
                     type: customError.typeError ?? `"${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
                 })
@@ -126,7 +127,7 @@ const Schema = class {
                 schemaData.$_data && dataValue) {
                 this.nestedSchema = schemaData.$_data
                 const result = this.validate(dataValue)
-                if (Object.keys(result.error).length > 0) {
+                if (Object.keys(result.error ?? {}).length > 0) {
                     error = { ...error, [schemaKey]: { ...result.error } }
                 }
                 this.nestedSchema = null
