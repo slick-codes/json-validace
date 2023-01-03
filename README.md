@@ -541,6 +541,7 @@ set the isValid porperty to true when if the validation is correct, and the oppo
 - default
 - trim , trimLeft, trimRight
 - modifyValue
+- datify
 ### toLower & toUpper
 > <i><b>Default:</b> no default value </i>
 > <i><b>Works with:</b> Boolean, Strings, JWT, mongoId, Number, Floats</i>
@@ -705,6 +706,44 @@ console.log(result)
 ```
 
 Notice how the username changed to slick-codes even though the original entry was slickcodes? well this is the flexibility of the modifyValue method.
+
+
+## datify
+datify basically converts inserted date string to a javascript standard date object.
+
+this is a relatively new modifyer and is only available in version 2.0 of the json-validace package.
+
+``` javascript 
+const { Schema } = require('json-validace')
+
+const userSchema =  new Schema({
+    name: "string",
+    entryDate: {
+      type: "date",
+      datify: true
+    }
+})
+
+const result = userSchema.validate({
+  name: "John Doe",
+  entryDate: "2002-01-23"
+})
+
+console.log(result)
+
+```
+
+```bash
+# BASH: Output
+{
+  error: null,
+  isValid: true,
+  data: {
+    name: "John Doe",
+    entryDate: 2002-01-25T00:00:00.000Z
+  }
+}
+```
 
 ## func 
 The func method is neigther a validator or a modifyer since it does not requires a return startment. however the func method is a very useful method that allows you write additional functionalities, this method is expected to return nothing, but it takes in a data parameter which is an object containing the value,key,isValid,error (error associated with the key), allErrors,errMessages (associated with the key) and a few others.
