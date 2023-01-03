@@ -1043,25 +1043,50 @@ console.log(result)
 ```
 
 
-When you're trying to validate an array of object you'll need to set the $_data property to [{}].
+When you're trying to validate an array of object you'll need to set the $_data property to [{}] like what we have in  the  example above,however if you only want to validate an array of object you can directly parse it inside of the Schema like the example below.
 
 example
 ```javascript
 const { Schema } = require('json-validace')
 
-const friends = new Schema({
-  friends: {
-    type: "array",
-    required: true,
-    $_data: [{
-      firstName: "string",
-      lastName: "string"
-    }]
-  }
-})
+// Schema
+const friends = new Schema([{
+    firstName: {
+        type: "string",
+        required: true
+    },
+    lastName: "string"
+}])
+
+// Data
+const result = friends.validate([
+  { firstName: "Bob", lastName: "Samuel"},
+  { firstName: "Samuel", lastName: "Jackson" },
+  { firstName: "John", lastName: "Doe" },
+  { firstName: "Timi", lastName: "Tams" }
+])
+
+console.log(result)
+
+```
+>Note: the example above only works for array of objects, you can validate an array of string, boolean, numbers of even floats.
+
+
+```bash
+# BASH: Output
+{
+  error: null,
+  isValid: true,
+  data: [
+    { firstName: 'Bob', lastName: 'Samuel' },
+    { firstName: 'Samuel', lastName: 'Jackson' },
+    { firstName: 'John', lastName: 'Doe' },
+    { firstName: 'Timi', lastName: 'Tams' }
+  ]
+}
 ```
 
-> <b>NOTE:</b> You can nest your object and array of object as deep as you want, however complex nesting can affect readability on the long run, so it's a good idea to keep your nesting to a minimum.
+> <b>NOTE:</b> You can nest  object and array of object as deep as you want, however complex nesting can affect readability on the long run, so it's a good idea to keep your nesting to a minimum.
 
 
 ## Complex Nesting
