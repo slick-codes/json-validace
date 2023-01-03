@@ -2,7 +2,10 @@ const { Schema } = require('./../src/')
 
 
 const userSchema = new Schema({
-    firstName: { required: true, type: "string" },
+    firstName: { 
+        required: [true, "%key% is required!"], 
+        type: "string"
+     },
     lastName: { required: true, type: "string" },
     surnName: "string",
     username: {
@@ -15,7 +18,10 @@ const userSchema = new Schema({
         type: "array",
         required: true,
         $_data: [{
-            firstName: { required: true, type: "string" },
+            firstName: { 
+                required: [true, "%key% is required!"], 
+                type: "string"
+            },
             lastName: { required: true, type: "string" },
             surnName: "string",
             username: {
@@ -75,3 +81,35 @@ test("Sucess: User with friends schema, complete with array of object and datify
 
 
 
+
+test("Failed: User with friends schema, complete with array of object and datify: true and custom error", () => {
+    expect(
+        userSchema.validate({
+            lastName: "Ezekiel-Hart",
+            username: "slick codes",
+            dateOfBirth: "2023-02-1",
+            friends: [{
+                lastName: "Jackson",
+                surnName: "Logan",
+                username: "sam-jack"
+            }, {
+                firstName: "John",
+                lastName: "Doe"
+            }, {
+                firstName: "Sutain",
+                lastName: "Stephani",
+                username: "sammy25"
+            }]
+        })
+
+    ).toEqual({
+        error: {
+            firstName: { required: "firstName is required!"},
+            friends: [{
+                firstName: {required: "firstName is required!"}
+            }]
+        },
+        isValid: false,
+        data: null
+    });
+});
