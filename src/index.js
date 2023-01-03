@@ -42,16 +42,36 @@ const Schema = class {
             })
         }
     }
+
+    #isArray(array){
+        return Array.isArray(array)
+    }
     /***
      * @param {object} objectData this is a key pair value that will be validated 
      * @param {function} callback an optional callback function 
      */
     validate(objectData, callback) {
 
-        const schema = this.nestedSchema ?? this.schema
+        let schema = this.nestedSchema ?? this.schema
         let error = {}
 
-        const schemaKeys = Object.keys(schema)
+        // prefix schema,objectData value if user parse in an array as a schema
+
+        if( Array.isArray(schema)){
+            schema = {
+                $_array : {
+                    type: "array",
+                    required: true,
+                    $_data: [schema[0]]
+                }
+            }
+            objectData = {
+                $_array: objectData
+            }
+        }
+
+
+        const schemaKeys = Object.keys( schema )
 
         // Prevent users from using more keys than the Schema allows
         if (this.config.preventUnregisteredKeys)
@@ -64,8 +84,10 @@ const Schema = class {
 
         for (let schemaKey of schemaKeys) {
             const dataValue = objectData[schemaKey]
+
             let schemaData = typeof schema[schemaKey] === 'string'? schema[schemaKey] : { ...schema[schemaKey] }
 
+            
 
             const setPlaceholder = (string, property) => {
                 return string.replace(/%value%/g, objectData[schemaKey])
@@ -261,14 +283,19 @@ const Schema = class {
         this.error = {}
         if (typeof callback === 'function')
             return callback(
-                Object.keys(error).length === 0 ? null : error,
+                Object.keys(error).length === 0 ? null : error['$_array'] ?? error,
                 Object.keys(error).length === 0,
-                Object.keys(error).length === 0 ? objectData : null)
+                Object.keys(error).length === 0 ? 
+                    objectData['$_array'] ?? objectData 
+                    : null
+                    )
         else
             return {
-                error: Object.keys(error).length === 0 ? null : error,
+                error: Object.keys(error).length === 0 ? null : error['$_array'] ?? error,
                 isValid: Object.keys(error).length === 0,
-                data: Object.keys(error).length === 0 ? objectData : null
+                data: Object.keys(error).length === 0 ? 
+                objectData["$_array"] ?? objectData 
+                : null
             }
     }
 
