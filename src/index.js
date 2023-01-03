@@ -155,6 +155,7 @@ const Schema = class {
                 this.nestedSchema = null
             }
             // validate nested array of object schema
+            if(dataValue)
             if (schemaData.type === "array" && schemaData.$_data) {
                 if (!Array.isArray(schemaData.$_data))
                     error = this.#setError(schemaKey, error, { // error handling
@@ -243,7 +244,11 @@ const Schema = class {
 
             // Handle data modification (midifyValue) feild
             if (typeof schemaData.modifyValue === 'function')
-                objectData[schemaKey] = schemaData.modifyValue(dataValue)
+                objectData[schemaKey] = schemaData.modifyValue(objectData[schemaKey])
+
+            if(schemaData.datify && dataValue && schemaData.type === 'date'){
+                objectData[schemaKey] = new Date(dataValue)
+            }
 
 
             // Handle: Enum
