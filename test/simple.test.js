@@ -109,3 +109,12 @@ test("Success ~ Array type is valid", () => {
         },
     });
 });
+
+// custom error messages
+
+// test("", () => {
+//     expect(simpleSchemas.loginForm({
+//         email: "hart"
+//     }))
+// })
+
