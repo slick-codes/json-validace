@@ -204,7 +204,9 @@ const signupSchema = new Schema({
     }
 })
 // validating the login object
-const result = signupSchema.validate({})
+const result = signupSchema.validate({
+  firstName: "John"
+})
 
 console.log(result)
 ```
