@@ -246,7 +246,7 @@ const Schema = class {
             if (typeof schemaData.modifyValue === 'function')
                 objectData[schemaKey] = schemaData.modifyValue(objectData[schemaKey])
 
-            if(schemaData.datify && dataValue && schemaData.type === 'date'){
+            if(schemaData.datify && objectData[schemaKey] && schemaData.type === 'date'){
                 objectData[schemaKey] = new Date(dataValue)
             }
 

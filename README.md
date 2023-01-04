@@ -1125,10 +1125,268 @@ console.log(result)
 }
 ```
 
-> <b>NOTE:</b> You can nest  object and array of object as deep as you want, however complex nesting can affect readability on the long run, so it's a good idea to keep your nesting to a minimum.
-
-
 ## Complex Nesting
-Complex nesting is basically when multiple objects, and arrays get's nested within themself.
+Complex nesting is basically when multiple objects, and arrays of object get's nested within themself, this can prove useful in most cases, however it's good to note that readability will easily become an issue if you have too much nesting.
 
-<!-- ### example -->
+### example
+```javascript
+const { Schema } = require('json-validace')
+
+// Schema
+const user = new Schema([
+    {
+        name: {type:"string", required: true},
+        dateOfBirth: {type: "date", required: true, datify: true},
+        gender: {
+            type: "string",
+            toLower: true,
+            required: true,
+            enum:[ ["male", "female", "others"], "%key% is not correct!"],
+        },
+        hobbies: {
+            type: ["array", "%key% must be an array of hobbies"],
+            required: true,
+            maxLength: 5,
+            minLength: 2
+        },
+        partner: {
+            type: "object",
+            required: true,
+            $_data: {
+                name: {type: "string", required: true},
+                gender:{
+                    required: true,
+                    toLower: true,
+                    type: "string",
+                    // enum: [["male", "female","others"], "not a valid gender!"]
+                },
+                dateOfBirth: {type: "date", required: true, datify: true}
+            }
+        }
+    }
+])
+
+
+// Data
+const result = user.validate([
+    {
+        name: "John Doe",
+        dateOfBirth: "1995-04-11",
+        gender: "Male",
+        hobbies: ["video game", "coding", "graphic designs"],
+        partner: {
+            name: "Stephanie",
+            gender: "female",
+            dateOfBirth: "1997-05-17"
+        }
+    },
+    {
+        name: "Samuel Jackson",
+        dateOfBirth: "2002-05-24",
+        gender: "male",
+        hobbies: ["football","chest", "Gambling", "suffing"],
+        partner: {
+            name: "Dominic",
+            gender: "male",
+            dateOfBirth: "2005-07-29"
+        }
+    }
+])
+
+
+
+console.log(result.data)
+
+```
+
+```bash 
+# BASH: Output
+[
+  {
+    name: 'John Doe',
+    dateOfBirth: 1995-04-11T00:00:00.000Z,
+    gender: 'male',
+    hobbies: [ 'video game', 'coding', 'graphic designs' ],
+    partner: {
+      name: 'Stephanie',
+      gender: 'female',
+      dateOfBirth: 1997-05-17T00:00:00.000Z
+    }
+  },
+  {
+    name: 'Samuel Jackson',
+    dateOfBirth: 2002-05-24T00:00:00.000Z,
+    gender: 'male',
+    hobbies: [ 'football', 'chest', 'Gambling', 'suffing' ],
+    partner: {
+      name: 'Dominic',
+      gender: 'male',
+      dateOfBirth: 2005-07-29T00:00:00.000Z
+    }
+  }
+]
+
+```
+
+
+> <b>NOTE:</b> You can nest  object and array of object as deep as you want, however complex nesting can affect readability on the long run, so it's a good idea to keep your nesting to a minimum.
+>
+
+the example above is a tip of the ice burge on how complicated with schema can go, each nested object can hold another nested object and east array of object can hold another array of object, the possiblities is in a way infinity but while it is possible to create a complex nesting i strongly advice against it.
+
+# Custom Error
+json-validace allows users to insert a custom error messages, this messages can be inserted with the validators, if inserted in the modifyer you'l not get an error, however since a modifyer does not return error, you'll also not see your error message.
+
+To use a custom error message, you'll need to insert the it in your validator as an array, the first item of the array contains the value of the key and the second one contains the error message.
+
+```javascript 
+const { Schema } = require('json-validace')
+
+const loginSchema = new Schema({
+  email: {
+    type: "email",
+    required: [true, "%key% is required!"],
+  },
+  password: {
+    type: "string",
+    required: [true, '%key% is required!'],
+    match: [
+      /^(?=.*[A-Za-z])(?=.*\d)[?=.*[@$!%*#?&]](A-Za-z\d@$!%*#?&){8,}$/, 
+      "%key% not strong enough!"
+    ]
+  }
+})
+
+const result = loginSchema.validate({
+  passowrd: "tds"
+})
+
+console.log(result)
+
+```
+
+```bash 
+# BASH: Output
+{
+  error: {
+    email: { required: 'email is required!' },
+    password: { match: 'password not strong enough!' }
+  },
+  isValid: false,
+  data: null
+}
+```
+
+like the example above, the custom error message will be inserted as the second item of the array, just like in the required, and match keys of the example above. the custom message can also be inserted in the type, and basically all validator properties with exception of the validate method.
+
+in the example above i used the %key% to dynamically insert the key of the object. 
+
+## Custom error placeholder
+
+in addition to the %key% placeholder, json-validace also provides the %value% and %property%.
+
+- <span style="font-size:20px; font-weight:bolder">%key%</span> : display the key of the object.
+```javascript
+  const { Schema } = require('json-validace')
+
+ 
+
+const data = new Schema({
+    body: {
+        type: ["string", " (%key%) requires a string!"],
+        required: [true, "(%key%) is required!"],
+        maxLength: [20, "(%key%) is too long!"],
+        minLength: [5, "(%key%) is too short!"]
+    },
+    title: {
+        type: ["string", "%key% required a string!"],
+        required: [true, "(%key%) is required!"],
+        maxLength: [10, "(%key%) is too long"]
+    }
+})
+
+const result = data.validate({
+    body: "json-validace has alot of "
+})
+
+console.log(result)
+
+  ```
+
+  ```bash 
+# bash: output
+{
+  error: {
+    body: { maxLength: '(body) is too long!' },
+    title: { required: '(title) is required!' }
+  },
+  isValid: false,
+  data: null
+}
+```
+
+In the above output you'll notice that the %key% on the body key was populated with the (body) key.
+
+- <span style="font-size:20px; font-weight:bolder">%value%</span> : display the value parsed in.
+  
+The %value% placeholder, is populated with the value that is validated.
+
+```javascript
+const { Schema } = require('json-validace')
+
+
+const data = new Schema({
+    body: {
+        type: "string",
+        required:true,
+        maxLength: [20, "( %value% ) is too long!"],
+    }
+})
+
+const result = data.validate({
+    body: "json-validace has alot of",
+})
+
+console.log(result)
+
+```
+```bash
+# BASH: Output 
+{
+  error: { body: { maxLength: '( json-validace has alot of ) is too long!' } },
+  isValid: false,
+  data: null
+}
+```
+Notice how to %value% placeholder get's repopulated with "json-validace has alot of" which happens to be the exact same thing parsed into it.
+
+- <span style="font-size:20px; font-weight:bolder">%property%</span> : display the porperty where the error is trigered from.
+  
+The %value% placeholder, is populated with the property it is asigned to.
+
+```javascript
+const { Schema } = require('json-validace')
+
+
+const data = new Schema({
+    body: {
+        type: "string",
+        required:true,
+        maxLength: [20, "%key% did nt meet the %property% requirement"],
+    }
+})
+
+const result = data.validate({
+    body: "json-validace has alot of",
+})
+
+console.log(result)
+```
+```bash
+# BASH: Output
+{
+  error: { body: { maxLength: 'body did nt meet the maxLength requirement' } },
+  isValid: false,
+  data: null
+}
+```
