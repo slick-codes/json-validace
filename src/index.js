@@ -106,7 +106,7 @@ const Schema = class {
             Object.keys(schemaData).forEach(property => {
                 if (
                     (Array.isArray(schemaData[property]) && property !== 'enum' && property !== "$_data") ||
-                    (property === 'enum' && Array.isArray(schemaData[property][0] && property !== "$_data"))
+                    (property === 'enum' && Array.isArray(schemaData[property][0]) && property !== "$_data")
                 ) {
                     customError = this.#createErrorObject(customError, dataValue, property, schemaKey, schemaData)
                     schemaData = { ...schemaData, [property]: schemaData[property][0] }
@@ -210,10 +210,10 @@ const Schema = class {
                 })
 
             // Handle: cases lower and upper
-            if (schemaData.toLower && schemaData.type == 'string') {
+            if (dataValue && schemaData.toLower && schemaData.type == 'string') {
                 objectData[schemaKey] = objectData[schemaKey].toLowerCase()
             }
-            else if (schemaData.toUpper && schemaData.type == 'string')
+            else if (dataValue && schemaData.toUpper && schemaData.type == 'string')
                 objectData[schemaKey] = objectData[schemaKey].toUpperCase()
 
             // trim text
@@ -250,7 +250,7 @@ const Schema = class {
                 objectData[schemaKey] = new Date(dataValue)
             }
 
-
+            
             // Handle: Enum
             if (schemaData.enum && !Array.isArray(schemaData.enum))
                 error = this.#setError(schemaKey, error, { // error handling
