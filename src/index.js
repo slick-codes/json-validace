@@ -183,7 +183,7 @@ const Schema = class {
                 objectData[schemaKey] = schemaData.default
 
             // Handle Required feild
-            if (schemaData.required && !objectData[schemaKey])
+            if (schemaData.required && objectData[schemaKey] === undefined )
                 error = this.#setError(schemaKey, error, { // error handling
                     required: customError.requiredError ?? `"${schemaKey}" feild is required!`,
                 })
