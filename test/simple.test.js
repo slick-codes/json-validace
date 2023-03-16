@@ -112,9 +112,14 @@ test("Success ~ Array type is valid", () => {
 
 // custom error messages
 
-// test("", () => {
-//     expect(simpleSchemas.loginForm({
-//         email: "hart"
-//     }))
-// })
+test("checking type: boolean", () => {
+    expect(simpleSchemas.booleanCheck.validate({isTall: false}))
+    .toEqual({
+        error: null,
+        isValid: true,
+        data: {
+            isTall: false
+        }
+    })
+})
 

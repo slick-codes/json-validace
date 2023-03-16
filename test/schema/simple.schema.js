@@ -87,3 +87,10 @@ module.exports.musicObject = new jsonValidace.Schema(
   },
   options
 );
+
+module.exports.booleanCheck = new jsonValidace.Schema({
+  isTall: {
+    type: "boolean",
+    required: true
+  }
+})
