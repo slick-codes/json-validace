@@ -140,10 +140,10 @@ const Schema = class {
                 })
 
             // Handle: cases lower and upper
-            if (schemaData.toLower) {
+            if (schemaData.toLower && objectData[schemaKey]) {
                 objectData[schemaKey] = objectData[schemaKey].toLowerCase()
             }
-            else if (schemaData.toUpper)
+            else if (schemaData.toUpper && objectData[schemaKey])
                 objectData[schemaKey] = objectData[schemaKey].toUpperCase()
 
             // Handle data modification (midifyValue) feild
@@ -152,14 +152,15 @@ const Schema = class {
 
 
             // Handle: Enum
-            if (schemaData.required && schemaData.enum && !Array.isArray(schemaData.enum))
-                error = this.#setError(schemaKey, error, { // error handling
-                    msc: `${schemaKey}.enum should be an array`
-                })
-            else if (schemaData.required && schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
-                error = this.#setError(schemaKey, error, { // error handling
-                    enum: ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
-                })
+            if (!(!schemaData.required && !objectData[schemaKey]))
+                if (schemaData.enum && !Array.isArray(schemaData.enum))
+                    error = this.#setError(schemaKey, error, { // error handling
+                        msc: `${schemaKey}.enum should be an array`
+                    })
+                else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
+                    error = this.#setError(schemaKey, error, { // error handling
+                        enum: ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
+                    })
 
 
             if (typeof schemaData.func === 'function') {
