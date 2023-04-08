@@ -43,7 +43,7 @@ const Schema = class {
         }
     }
 
-    #isArray(array){
+    #isArray(array) {
         return Array.isArray(array)
     }
     /***
@@ -57,9 +57,9 @@ const Schema = class {
 
         // prefix schema,objectData value if user parse in an array as a schema
 
-        if( Array.isArray(schema)){
+        if (Array.isArray(schema)) {
             schema = {
-                $_array : {
+                $_array: {
                     type: "array",
                     required: true,
                     $_data: [schema[0]]
@@ -71,7 +71,7 @@ const Schema = class {
         }
 
 
-        const schemaKeys = Object.keys( schema )
+        const schemaKeys = Object.keys(schema)
 
         // Prevent users from using more keys than the Schema allows
         if (this.config.preventUnregisteredKeys)
@@ -85,9 +85,9 @@ const Schema = class {
         for (let schemaKey of schemaKeys) {
             const dataValue = objectData[schemaKey]
 
-            let schemaData = typeof schema[schemaKey] === 'string'? schema[schemaKey] : { ...schema[schemaKey] }
+            let schemaData = typeof schema[schemaKey] === 'string' ? schema[schemaKey] : { ...schema[schemaKey] }
 
-            
+
 
             const setPlaceholder = (string, property) => {
                 return string.replace(/%value%/g, objectData[schemaKey])
@@ -96,7 +96,7 @@ const Schema = class {
             }
 
             // set key to object if type is set directly
-            if (typeof schemaData === 'string' || Array.isArray(schemaData)){
+            if (typeof schemaData === 'string' || Array.isArray(schemaData)) {
                 schemaData = { type: schemaData }
             }
 
@@ -114,7 +114,7 @@ const Schema = class {
             })
 
             // check if schema has type 
-            if (!schemaData.type )
+            if (!schemaData.type)
                 error = this.#setError(schemaKey, error, { // error handling
                     type: customError.typeError ?? `"${schemaKey}" value is not a supported ${schemaData.type ?? 'datatype'}`,
                 })
@@ -155,27 +155,27 @@ const Schema = class {
                 this.nestedSchema = null
             }
             // validate nested array of object schema
-            if(dataValue)
-            if (schemaData.type === "array" && schemaData.$_data) {
-                if (!Array.isArray(schemaData.$_data))
-                    error = this.#setError(schemaKey, error, { // error handling
-                        type: customError.typeError ?? ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
-                    })
+            if (dataValue)
+                if (schemaData.type === "array" && schemaData.$_data) {
+                    if (!Array.isArray(schemaData.$_data))
+                        error = this.#setError(schemaKey, error, { // error handling
+                            type: customError.typeError ?? ` Schema key: "${schemaKey}" $_data is not a supported ${schemaData.type ?? 'datatype'}`,
+                        })
 
-                if (!Array.isArray(dataValue)) {
-                    error = this.#setError(schemaKey, error, { // error handling
-                        type: customError.typeError ?? ` "${schemaKey}" should be an array of object`,
-                    })
-                } else for (let object of dataValue) {
-                    this.nestedSchema = schemaData.$_data[0]
-                    const result = this.validate(object)
-                    if (Object.keys(result.error || {}).length > 0) {
-                        error = { ...error, [schemaKey]: [result.error] }
+                    if (!Array.isArray(dataValue)) {
+                        error = this.#setError(schemaKey, error, { // error handling
+                            type: customError.typeError ?? ` "${schemaKey}" should be an array of object`,
+                        })
+                    } else for (let object of dataValue) {
+                        this.nestedSchema = schemaData.$_data[0]
+                        const result = this.validate(object)
+                        if (Object.keys(result.error || {}).length > 0) {
+                            error = { ...error, [schemaKey]: [result.error] }
+                        }
+                        this.nestedSchema = null
                     }
-                    this.nestedSchema = null
-                }
 
-            }
+                }
 
 
             // handle default 
@@ -210,10 +210,12 @@ const Schema = class {
                 })
 
             // Handle: cases lower and upper
-            if (dataValue && schemaData.toLower && schemaData.type == 'string') {
+
+            if (schemaData.toLower && objectData[schemaKey]) {
                 objectData[schemaKey] = objectData[schemaKey].toLowerCase()
             }
-            else if (dataValue && schemaData.toUpper && schemaData.type == 'string')
+            else if (schemaData.toUpper && objectData[schemaKey])
+
                 objectData[schemaKey] = objectData[schemaKey].toUpperCase()
 
             // trim text
@@ -246,20 +248,23 @@ const Schema = class {
             if (typeof schemaData.modifyValue === 'function')
                 objectData[schemaKey] = schemaData.modifyValue(objectData[schemaKey])
 
-            if(schemaData.datify && objectData[schemaKey] && schemaData.type === 'date'){
+            if (schemaData.datify && objectData[schemaKey] && schemaData.type === 'date') {
                 objectData[schemaKey] = new Date(dataValue)
             }
 
-            
+
             // Handle: Enum
-            if (schemaData.enum && !Array.isArray(schemaData.enum))
-                error = this.#setError(schemaKey, error, { // error handling
-                    enum: customError.enumError ?? `SchemaError: should be an array`
-                })
-            else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
-                error = this.#setError(schemaKey, error, { // error handling
-                    enum: customError.enumError ?? ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
-                })
+
+            if (!(!schemaData.required && !objectData[schemaKey]))
+                if (schemaData.enum && !Array.isArray(schemaData.enum))
+                    error = this.#setError(schemaKey, error, { // error handling
+                        msc: `${schemaKey}.enum should be an array`
+                    })
+                else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
+                    error = this.#setError(schemaKey, error, { // error handling
+                        enum: ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
+                    })
+
 
 
             // Handle validate function
@@ -290,17 +295,17 @@ const Schema = class {
             return callback(
                 Object.keys(error).length === 0 ? null : error['$_array'] ?? error,
                 Object.keys(error).length === 0,
-                Object.keys(error).length === 0 ? 
-                    objectData['$_array'] ?? objectData 
+                Object.keys(error).length === 0 ?
+                    objectData['$_array'] ?? objectData
                     : null
-                    )
+            )
         else
             return {
                 error: Object.keys(error).length === 0 ? null : error['$_array'] ?? error,
                 isValid: Object.keys(error).length === 0,
-                data: Object.keys(error).length === 0 ? 
-                objectData["$_array"] ?? objectData 
-                : null
+                data: Object.keys(error).length === 0 ?
+                    objectData["$_array"] ?? objectData
+                    : null
             }
     }
 
