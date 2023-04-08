@@ -152,11 +152,11 @@ const Schema = class {
 
 
             // Handle: Enum
-            if (schemaData.enum && !Array.isArray(schemaData.enum))
+            if (schemaData.required && schemaData.enum && !Array.isArray(schemaData.enum))
                 error = this.#setError(schemaKey, error, { // error handling
                     msc: `${schemaKey}.enum should be an array`
                 })
-            else if (schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
+            else if (schemaData.required && schemaData.enum && !schemaData.enum.includes(objectData[schemaKey]))
                 error = this.#setError(schemaKey, error, { // error handling
                     enum: ` ${schemaKey} should be an enum of (${schemaData.enum.join(' | ')})`
                 })
